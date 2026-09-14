@@ -16,6 +16,7 @@
 
 #include QMK_KEYBOARD_H
 #include "keychron_common.h"
+#include "os_detection.h"  // Detect OS Mode automatically
 
 enum layers {
     // TODO: BASE layers (e.g., Split, Typing, Standard, Gaming) must always be the lowest numbered layers.
@@ -31,6 +32,45 @@ enum layers {
     // Refer to QMK's layer doc beginners guide: https://docs.qmk.fm/feature_layers#beginners 
     _FUNCTION,    // Function Layer (Split Layout). Hint: It's a combination of Function, Magic and Lower Layers in MoErgo
 };
+
+// ###############################################################
+// Helper Functions
+// ###############################################################
+
+// ---------------------------------------------------------------
+// Detect OS Mode (Windows or MacOS) based on CG_TOGG
+// ---------------------------------------------------------------
+// CG_TOGG / keymap_config.swap_lctl_lgui is being used as the MAC/WIN mode indicator.
+static bool is_windows_mode(void) {
+    // return true: Windows, return false: MacOS
+    return !keymap_config.swap_lctl_lgui;
+}
+
+void keyboard_post_init_user(void) {
+    // Options: OS_UNSURE OS_LINUX OS_WINDOWS OS_MACOS OS_IOS
+    // TODO: Test if it works
+    os_variant_t OPERATING_SYSTEM = detected_host_os();
+
+    // If it is MacOS, turn on CG_TOGG
+    if (OPERATING_SYSTEM == OS_MACOS || OPERATING_SYSTEM == OS_IOS) {
+        keymap_config.swap_lctl_lgui = true;
+        eeconfig_update_keymap(&keymap_config);
+    } else if (OPERATING_SYSTEM == OS_WINDOWS || OPERATING_SYSTEM == OS_LINUX) {
+        keymap_config.swap_lctl_lgui = false;
+        eeconfig_update_keymap(&keymap_config);
+    } else if (OPERATING_SYSTEM == OS_UNSURE) {
+        // OS detection failed, determine the OS
+        if (is_windows_mode()) {
+            OPERATING_SYSTEM = OS_WINDOWS;
+        } else {
+            OPERATING_SYSTEM = OS_MACOS;
+        }
+    } else {
+        // OS detection failed, default to Windows
+        keymap_config.swap_lctl_lgui = false;
+        eeconfig_update_keymap(&keymap_config);
+    }
+}
 
 // ---------------------------------------------------------------
 // Define Aliases
@@ -129,7 +169,10 @@ enum layers {
 #define SM_MINS   KC_MINS     // -
 #define SM_UNDS   S(KC_MINS)  // _
 
-// ------- Define Aliases: File Management  -------
+// ---------------------------------------------------------------
+// Define Aliases: OS specific actions
+// ---------------------------------------------------------------
+
 #define CUT      C(KC_X)
 #define COPY     C(KC_C)
 #define PASTE    C(KC_V)
@@ -138,8 +181,10 @@ enum layers {
 #define FIND     C(KC_F)
 #define SEL_ALL  C(KC_A)
 
-// ------- Define Aliases: Community Modules  -------
-/* Getreuer's Select Word */
+// ---------------------------------------------------------------
+// Define Aliases: Community Modules
+// ---------------------------------------------------------------
+// ------- Getreuer's Select Word  -------
 #define SEL_WRD SELECT_WORD
 #define SEL_WRB SELECT_WORD_BACK
 #define SEL_LNE SELECT_LINE
@@ -190,22 +235,16 @@ enum custom_keycodes {
 
 };
 
-// CG_TOGG / keymap_config.swap_lctl_lgui is being used as the MAC/WIN mode indicator.
-static bool is_windows_mode(void) {
-    // return true: Windows, return false: MacOS
-    return !keymap_config.swap_lctl_lgui;
-}
-
 // Getreuer's Select Word module requires a OS Detection
 // https://getreuer.info/posts/keyboards/select-word/index.html#mac-hotkeys
 /** bool select_word_host_is_mac(void) { */
 /**   return mod_config(MOD_LGUI) == MOD_LCTL;  // GUI/Ctrl swapped => Mac. */
 /** } */
 
-bool select_word_host_is_mac(void) {
-  // return true: MacOS, return false: Windows
-  return !is_windows_mode();
-}
+/** bool select_word_host_is_mac(void) { */
+/**   // return true: MacOS, return false: Windows */
+/**   return !is_windows_mode(); */
+/** } */
 
 // App Switcher State
 static bool app_switch_active = false;
@@ -600,89 +639,72 @@ void matrix_scan_user(void) {
 // clang-format off
 
 // Clear keymap template:
-    /** [<Layer_Name>] = LAYOUT_ansi_89( */
-    /**     _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,   */
-    /**     _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,   */
-    /**     _______,  _______,            _______,  _______,  _______,  _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   */
-    /**     _______,  _______,            _______,  _______,  _______,  _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,   */
-    /**     _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,   */
-    /**     _______,  _______,  _______,            _______,  _______,  _______,            _______,            _______,                                          _______,  _______,  _______ */
-    /** ), */
+/**
+    [<Layer_Name>] = LAYOUT_split_3x6_5(
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  _______,  _______,                      _______,  _______,  _______,  _______,  _______,  _______,
+                                      _______,  _______,  _______,                      _______,  _______,  _______
+    ),
+*/
+
+/**
+    [_FACTORY] = LAYOUT_split_3x6_5(
+        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
+        KC_ESC,   KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     XXXXXXX,  XXXXXXX,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
+        KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
+                                      LT_CSR,   LT_NUM,   KC_TAB,                       KC_ESC,   LT_SYM,   LT_FN
+    ),
+*/
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    /** NOTE: Don't use LT for layers like cursor, which work on same side chords. */
-    [_BASE_SPL] = LAYOUT_ansi_89(
-        KC_MUTE,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  KC_TAB,             KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,               KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,  XXXXXXX,  XXXXXXX,  XXXXXXX,
-        XXXXXXX,  KC_ESC,             HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,              HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  ST_LSFT,            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     XXXXXXX,  KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  ST_RSFT,  XXXXXXX,
-        XXXXXXX,  XXXXXXX,  XXXXXXX,            LT_CSR,   LT_NUM,   KC_TAB,             LT_SYM,             LT_FN,                                            XXXXXXX,  XXXXXXX,  XXXXXXX
+    [_BASE_SPL] = LAYOUT_split_3x6_5(
+        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
+        KC_ESC,   HRM_A,    HRM_S,    HRM_S,    HRM_S,    HRM_G,    XXXXXXX,  XXXXXXX,  HRM_G,    HRM_G,    HRM_G,    HRM_G,    HRM_SCLN, KC_QUOT,
+        KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
+                                      LT_CSR,   LT_NUM,   KC_TAB,                       KC_ESC,   LT_SYM,   LT_FN
     ),
 
-    [_TYPING] = LAYOUT_ansi_89(
-        _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______,
-        _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,
-        _______,  _______,            _______,  _______,  _______,  _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-        _______,  _______,            KC_A,     KC_S,     KC_D,     KC_F,     _______,            _______,  KC_J,     KC_K,     KC_L,     KC_SCLN,  _______,  _______,            _______,
-        _______,  _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,
-        _______,  _______,  _______,            KC_BSPC,  KC_SPC,   KC_TAB,             KC_DEL,             KC_ENT,                                           _______,  _______,  _______
+    [_TYPING] = LAYOUT_split_3x6_5(
+        _______,  _______,  _______,  _______,  _______,  _______,  XXXXXXX,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,
+        _______,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     XXXXXXX,  XXXXXXX,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  _______,
+        _______,  _______,  _______,  _______,  _______,  _______,                      _______,  _______,  _______,  _______,  _______,  _______,
+                                      KC_BSPC,  KC_SPC,   KC_TAB,                       KC_ESC,   KC_DEL,   KC_ENT
     ),
 
-    [_SYMBOL] = LAYOUT_ansi_89(
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  SM_EXCL,            SM_LBRC,  SM_LCBR,  SM_RCBR,  KC_RBRC,  SM_AMPS,            SM_LPRN,  KC_BSPC,  KC_SPC,   KC_ENT,   KC_DEL,   KC_TAB,   XXXXXXX,  XXXXXXX,  XXXXXXX,
-        XXXXXXX,  SM_HASH,            SM_CRET,  SM_EQL,   SM_UNDS,  SM_DLR,   SM_ASTR,            SM_TICK,  KC_RSFT,  KC_RCTL,  KC_RALT,  KC_RGUI,  MC_TICK,  XXXXXXX,            XXXXXXX,
-        /** XXXXXXX,  SM_TILD,            SM_LT,    SM_PLUS,  SM_MINS,  SM_GT,    SM_PIPE,  XXXXXXX,  SM_RPRN,  KC_BSPC,  KC_TAB,   KC_SPC,   KC_ENT,   KC_RSFT,            XXXXXXX, */
-        XXXXXXX,  SM_TILD,            SM_LPRN,  SM_PLUS,  SM_MINS,  SM_RPRN,  SM_PIPE,  XXXXXXX,  SM_RPRN,  KC_BSPC,  KC_TAB,   KC_SPC,   KC_ENT,   KC_RSFT,            XXXXXXX,
-        XXXXXXX,  XXXXXXX,  XXXXXXX,            SM_PERC,  SM_ADS,   _______,            _______,            _______,                                          XXXXXXX,  XXXXXXX,  XXXXXXX
+    [_SYMBOL] = LAYOUT_split_3x6_5(
+        XXXXXXX,  SM_EXCL,  SM_LBRC,  SM_LCBR,  SM_RCBR,  KC_RBRC,  XXXXXXX,  XXXXXXX,  SM_LPRN,  KC_BSPC,  KC_SPC,   KC_ENT,   KC_DEL,   KC_TAB,
+        XXXXXXX,  SM_HASH,  SM_CRET,  SM_EQL,   SM_UNDS,  SM_DLR,   XXXXXXX,  XXXXXXX,  SM_TICK,  KC_RSFT,  KC_RCTL,  KC_RALT,  KC_RGUI,  MC_TICK,
+        XXXXXXX,  SM_TILD,  SM_LPRN,  SM_PLUS,  SM_MINS,  SM_RPRN,                       SM_RPRN,  KC_BSPC,  KC_TAB,   KC_SPC,   KC_ENT,   KC_RSFT,
+                                      SM_PERC,  SM_ADS,   _______,                       _______,  _______,  _______
     ),
 
-    [_NUMBER] = LAYOUT_ansi_89(
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  _______,            KC_DEL,   KC_ENT,   KC_SPC,   KC_BSPC,  XXXXXXX,            SM_LPRN,  KC_7,     KC_8,     KC_9,     SM_COLN,  SM_PERC,  XXXXXXX,  XXXXXXX,  XXXXXXX,
-        XXXXXXX,  KC_CALC,            KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  KC_MEH,             KC_DOT,   KC_4,     KC_5,     KC_6,     SM_MINS,  SM_PLUS,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  _______,            SEL_ALL,  SEL_LNE,  SEL_WRD,  FIND,     XXXXXXX,  XXXXXXX,  SM_RPRN,  KC_1,     KC_2,     KC_3,     SM_ASTR,  SM_SLSH,            KC_UP,
-        XXXXXXX,  XXXXXXX,  XXXXXXX,            _______,  _______,  _______,            KC_0,               _______,                                          KC_LEFT,  KC_DOWN,  KC_RGHT
+    [_NUMBER] = LAYOUT_split_3x6_5(
+        XXXXXXX,  _______,  KC_DEL,   KC_ENT,   KC_SPC,   KC_BSPC,  XXXXXXX,  XXXXXXX,  SM_LPRN,  KC_7,     KC_8,     KC_9,     SM_COLN,  SM_PERC,
+        XXXXXXX,  KC_CALC,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  XXXXXXX,  XXXXXXX,  KC_DOT,   KC_4,     KC_5,     KC_6,     SM_MINS,  SM_PLUS,
+        XXXXXXX,  _______,  SEL_ALL,  SEL_LNE,  SEL_WRD,  FIND,                         SM_RPRN,  KC_1,     KC_2,     KC_3,     SM_ASTR,  SM_SLSH,
+                                      _______,  _______,  _______,                       KC_0,     _______,  _______
     ),
 
-    [_CURSOR] = LAYOUT_ansi_89(
-        _______,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  WM_SWTCH,           WM_CLOSE, WM_TCLS,  AP_FEXP,  RENAME,   SEL_ALL,            AP_FFOX,  UNDO,     KC_UP,    REDO,     KC_ESC,   KC_TAB,   XXXXXXX,  XXXXXXX,  XXXXXXX,
-        XXXXXXX,  DEL_NORM,           KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,            AP_CHRM,  KC_LEFT,  KC_DOWN,  KC_RGHT,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  XXXXXXX,            UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,  XXXXXXX,  WM_NEW,   TX_HOME,  KC_PGDN,  KC_PGUP,  TX_END,   C(KC_L),            XXXXXXX,
-        XXXXXXX,  XXXXXXX,  XXXXXXX,            _______,  WM_SPOT,   _______,           SEL_WRD,            _______,                                          XXXXXXX,  XXXXXXX,  XXXXXXX
+    [_CURSOR] = LAYOUT_split_3x6_5(
+        WM_SWTCH, WM_CLOSE, WM_TCLS,  AP_FEXP,  RENAME,   SEL_ALL,  XXXXXXX,  XXXXXXX,  AP_FFOX,  UNDO,     KC_UP,    REDO,     KC_ESC,   KC_TAB,
+        DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  XXXXXXX,  XXXXXXX,  AP_CHRM,  KC_LEFT,  KC_DOWN,  KC_RGHT,  XXXXXXX,  XXXXXXX,
+        XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                      WM_NEW,   TX_HOME,  KC_PGDN,  KC_PGUP,  TX_END,   XXXXXXX,
+                                      _______,  WM_SPOT,  _______,                      SEL_WRD,  _______,  _______
     ),
 
-    [_GAMING] = LAYOUT_ansi_89(
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  KC_TAB,             _______,  KC_W,     _______,  _______,  _______,            _______,  _______,  KC_UP,    _______,  _______,  _______,  XXXXXXX,  XXXXXXX,  XXXXXXX,
-        XXXXXXX,  KC_LSFT,            KC_A,     KC_S,     KC_D,     _______,  _______,            _______,  KC_LEFT,  KC_DOWN,  KC_RGHT,  _______,  _______,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  KC_LCTL,            _______,  _______,  _______,  _______,  _______,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,            XXXXXXX,
-        XXXXXXX,  XXXXXXX,  XXXXXXX,            _______,  KC_SPC,   _______,            KC_ENT,             _______,                                          XXXXXXX,  XXXXXXX,  XXXXXXX
+    [_GAMING] = LAYOUT_split_3x6_5(
+        XXXXXXX,  _______,  KC_W,     _______,  _______,  _______,  XXXXXXX,  XXXXXXX,  _______,  _______,  KC_UP,    _______,  _______,  _______,
+        XXXXXXX,  KC_A,     KC_S,     KC_D,     _______,  _______,  XXXXXXX,  XXXXXXX,  KC_LEFT,  KC_DOWN,  KC_RGHT,  _______,  _______,  _______,
+        KC_LCTL,  _______,  _______,  _______,  _______,  _______,                      _______,  _______,  _______,  _______,  _______,  _______,
+                                      _______,  KC_SPC,   _______,                      KC_ENT,   _______,  _______
     ),
 
-
-    [_BASE_STD] = LAYOUT_ansi_89(
-        KC_MUTE,  KC_ESC,             KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,             KC_PSCR,  KC_CALC,
-        MC_1,     KC_GRV,             KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,            KC_HOME,
-        MC_2,     KC_TAB,             KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,               KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_DEL,
-        MC_3,     KC_CAPS,            KC_A,     KC_S,     KC_D,     KC_F,     KC_G,               KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,  KC_ENT,             KC_END,
-        MC_4,     KC_LSFT,            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,            KC_UP,
-        MC_5,     KC_LCTL,  KC_LGUI,            KC_LALT,  KC_SPC,   KC_RALT,            KC_SPC,             MO_FN,                                            KC_LEFT,  KC_DOWN,  KC_RGHT
-    ),
-
-    [_FUNCTION] = LAYOUT_ansi_89(
-        UG_TOGG,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,
-        XXXXXXX,  XXXXXXX,            XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,            XXXXXXX,
-        XXXXXXX,  TG_STD,             BT_HST1,  BT_HST2,  BT_HST3,  P2P4G,    AP_TERM,            AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,   XXXXXXX,  XXXXXXX,  XXXXXXX,
-        XXXXXXX,  MT_CPCG,            KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,            _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,   XXXXXXX,            KC_END,
-        XXXXXXX,  TG_TYP,             KC_MPRV,  KC_MPLY,  KC_MNXT,  UR_GPT,   AP_FFOX,  BAT_LVL,  AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,             KC_PGUP,
-        XXXXXXX,  XXXXXXX,  XXXXXXX,            TG_CSR,   TG_NUM,   TG_GAME,            TG_SYM,             _______,                                          KC_HOME,  KC_PGDN,  KC_END
+    [_FUNCTION] = LAYOUT_split_3x6_5(
+        TG_STD,   BT_HST1,  BT_HST2,  BT_HST3,  P2P4G,    AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
+        MT_CPCG,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  XXXXXXX,  XXXXXXX,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
+        TG_TYP,   KC_MPRV,  KC_MPLY,  KC_MNXT,  UR_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
+                                      TG_CSR,   TG_NUM,   TG_GAME,                      _______,  TG_SYM,   _______
     ),
 
 };
@@ -708,14 +730,20 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][2] = {
 
 // ------- RGB Light Configuration -------
 
-// V10_Mac RGB-Key Layout
-/** __:KNOB    0:ESC              1:F1       2:F2      3:F3      4:F4      5:F5      6:F6      7:F7      8:F8      9:F9     10:F10    11:F11    12:F12             13:XXXX  14:XXXX  */
-/** 15:M_1    16:GRV              17:1      18:2      19:3      20:4      21:5      22:6      23:7      24:8      25:9      26:0      27:MINS   28:EQL    xx_BSPC           30:HOME  */
-/** 31:M_2    32:TAB              33:Q      34:W      35:E      36:R      37:T                38:Y      39:U      40:I      41:O      42:P      43:[      44:]     45:\     46:DEL   */
-/** 47:M_3    48:CAPS             49:A      50:S      51:D      52:F      53:G                54:H      55:J      56:K      57:L      58:;      59:QUOT   60:ENT            61:END   */
-/** 62:M_4    63:LSFT             64:Z      65:X      66:C      67:V      68:B      69:B      70:N      71:M      72:,      73:.      74:/      75:RSFT            76:UP             */
-/** 77:M_5    78:LCTL   79:LGUI             80:LALT   81:SPC    82:RALT             83:SPC              84:FN                                             85:LEFT  86:DOWN  87:RGHT  */
+// Corne v4.1 RGB LED Index Map
+/**
+    00 01 02 03 04 05 06    07 08 09 10 11 12 13
+    14 15 16 17 18 19 20    21 22 23 24 25 26 27
+    28 29 30 31 32 33          34 35 36 37 38 39
+                40 41 42    43 44 45
 
+   ------------------------------------------------------------------------------- 
+
+    00=TAB   01=Q  02=W  03=E  04=R    05=T    06=extra  07=extra  08=Y    09=U   10=I     11=O    12=P     13=BSLS
+    14=ESC   15=A  16=S  17=D  18=F    19=G    20=extra  21=extra  22=H    23=J   24=K     25=L    26=SCLN  27=QUOT
+    28=LSFT  29=Z  30=X  31=C  32=V    33=B                        34=N    35=M   36=COMM  37=DOT  38=SLSH  39=RSFT
+                               40=CSR  41=NUM  42=TAB    43=ESC    44=SYM  45=FN
+*/
 
 // Set RGB color for an array of LED indices.
 static void set_rgb_color(
@@ -941,13 +969,6 @@ bool rgb_matrix_indicators_user(void) {
         // ---------------------------------------------------------------
         case _SYMBOL: {
             /** ALL Symbol Kyes LED Color */
-            /** static const uint8_t rgb_idx_symbols[] = { */
-            /**     32, 33, 34, 35, 36, 37, */
-            /**     48, 49, 50, 51, 52, 53, */
-            /**     63, 64, 65, 66, 67, 68, */
-            /**     80, 81, 82 */
-            /** }; */
-            /** SET_RGB_COLOR(rgb_idx_symbols, rgb_purple); */
             
             // Use Sunsau's red (quotes), green (arrows), blue (groups), purple (flips), and yellow (Vim) colors for symbols
             /** Quotes keys LED Colors  **/
