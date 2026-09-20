@@ -1,7 +1,7 @@
 #pragma once
 
 // Define the #layers in your keymap.c file.
-#define DYNAMIC_KEYMAP_LAYER_COUNT 11
+// #define DYNAMIC_KEYMAP_LAYER_COUNT 11
 
 // --- Home Row Mods (HRMs) Configurations --- 
 // ME + Internet
