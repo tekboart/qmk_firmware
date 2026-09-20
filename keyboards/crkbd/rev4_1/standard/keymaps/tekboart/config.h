@@ -1,7 +1,6 @@
 #pragma once
 
 // Define the #layers in your keymap.c file.
-// V10 Max supports up to 11 layers.
 #define DYNAMIC_KEYMAP_LAYER_COUNT 11
 
 // --- Home Row Mods (HRMs) Configurations --- 
