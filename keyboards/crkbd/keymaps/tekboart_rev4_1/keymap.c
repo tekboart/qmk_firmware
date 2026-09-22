@@ -665,8 +665,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_BASE_SPL] = LAYOUT_split_3x6_3_ex2(
     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
     KC_ESC,   HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,    MO_MGC,   XXXXXXX,  HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,
+    XXXXXXX,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  XXXXXXX,
+                                  LT_NUM,   LT_CSR,   KC_TAB,                       KC_ESC,   LT_SYM,   LT_FN
+),
+
+[_BASE_STD] = LAYOUT_split_3x6_3_ex2(
+    KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
+    KC_ESC,   KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     MO_MGC,   XXXXXXX,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
     KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
-                                  LT_CSR,   LT_NUM,   KC_TAB,                       KC_ESC,   LT_SYM,   LT_FN
+                                  KC_LCTL,  KC_LGUI,  KC_LALT,                      KC_SPC,   KC_RALT,  MO_FN
 ),
 
 [_TYPING] = LAYOUT_split_3x6_3_ex2(
@@ -706,7 +713,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_FUNCTION] = LAYOUT_split_3x6_3_ex2(
     TG_STD,   KC_VOLD,  KC_MUTE,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
-    MT_CPCG,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  XXXXXXX,  XXXXXXX,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
+    KC_CAPS,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  XXXXXXX,  XXXXXXX,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
     TG_TYP,   KC_MPRV,  KC_MPLY,  KC_MNXT,  UR_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
                                   TG_CSR,   TG_NUM,   TG_GAME,                      _______,  TG_SYM,   _______
 ),
@@ -714,46 +721,36 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_MAGIC] = LAYOUT_split_3x6_3_ex2(
     XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
     XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  _______,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
-    XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
+    XXXXXXX,  CG_TOGG,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
                                   XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  XXXXXXX,  XXXXXXX
 ),
 
 };
 
 // Define the encoder rotation map for each layer
-// The encoder map defines the behavior of the rotary encoder (aka Knob) for each layer
-// Examples: KC_VOLD: Volume Down, KC_VOLU: Volume Up, UG_VALD: Underglow Brightness Down, UG_VALU: Underglow Brightness Up
-// TODO: Add diff for layers, e.g., SPL_LAYER_2 + turn_right --> Screen Brightness Up, turn_left --> Screen Brightness Down
-#if defined(ENCODER_MAP_ENABLE)
-const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][2] = {
-/** [TGL_BASE] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU)}, */
-    /** [TGL_FN]   = {ENCODER_CCW_CW(UG_VALD, UG_VALU)}, */
-    [_BASE_SPL]    = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU)},
-    [_TYPING]      = {ENCODER_CCW_CW(KC_TRNS, KC_TRNS)},
-    [_BASE_STD]    = {ENCODER_CCW_CW(KC_TRNS, KC_TRNS)},
-    [_FUNCTION]    = {ENCODER_CCW_CW(UG_VALD, UG_VALU)},
-    [_SYMBOL]      = {ENCODER_CCW_CW(KC_TRNS, KC_TRNS)},
-    [_NUMBER]      = {ENCODER_CCW_CW(KC_TRNS, KC_TRNS)},
-    [_CURSOR]      = {ENCODER_CCW_CW(KC_TRNS, KC_TRNS)},
-    [_GAMING]      = {ENCODER_CCW_CW(KC_TRNS, KC_TRNS)},
+#ifdef ENCODER_MAP_ENABLE
+const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
+    [_BASE_SPL]    = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_TYPING]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_BASE_STD]    = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_FUNCTION]    = { ENCODER_CCW_CW(UG_VALD, UG_VALU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_SYMBOL]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_NUMBER]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_CURSOR]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_GAMING]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
 };
 #endif // ENCODER_MAP_ENABLE
 
 // ------- RGB Light Configuration -------
 
 // Corne v4.1 RGB LED Index Map
+// NOTE: For split keyboards, the layout becomes vertical and indices jump between halves.
+// https://docs.qmk.fm/features/split_keyboard#layout-macro
 /**
     00 01 02 03 04 05 06    07 08 09 10 11 12 13
     14 15 16 17 18 19 20    21 22 23 24 25 26 27
     28 29 30 31 32 33          34 35 36 37 38 39
                 40 41 42    43 44 45
-
-   ------------------------------------------------------------------------------- 
-
-    00=TAB   01=Q  02=W  03=E  04=R    05=T    06=extra  07=extra  08=Y    09=U   10=I     11=O    12=P     13=BSLS
-    14=ESC   15=A  16=S  17=D  18=F    19=G    20=extra  21=extra  22=H    23=J   24=K     25=L    26=SCLN  27=QUOT
-    28=LSFT  29=Z  30=X  31=C  32=V    33=B                        34=N    35=M   36=COMM  37=DOT  38=SLSH  39=RSFT
-                               40=CSR  41=NUM  42=TAB    43=ESC    44=SYM  45=FN
 */
 
 // Set RGB color for an array of LED indices.
@@ -846,14 +843,10 @@ bool rgb_matrix_indicators_user(void) {
         case _BASE_SPL:
         case _TYPING: {
             static const uint8_t base_spl_rgb_idx[] = {
-                32, 33, 34, 35, 36, 37,
-                38, 39, 40, 41, 42, 43,
-                48, 49, 50, 51, 52, 53,
-                54, 55, 56, 57, 58, 59,
-                63, 64, 65, 66, 67, 68,
-                70, 71, 72, 73, 74, 75,
-                80, 81, 82,
-                83, 84
+                 0,  1,  2,  3,  4,  5,  6,    7,  8,  9, 10, 11, 12, 13,
+                14, 15, 16, 17, 18, 19, 20,   21, 22, 23, 24, 25, 26, 27,
+                28, 29, 30, 31, 32, 33,           34, 35, 36, 37, 38, 39,
+                            40, 41, 42,           43, 44, 45
             };
 
             SET_RGB_COLOR(base_spl_rgb_idx, rgb_white_warm);
@@ -861,8 +854,8 @@ bool rgb_matrix_indicators_user(void) {
             /** Set diff color for HRMs only on _BASE_SPL. */
             if (active_layer == _BASE_SPL) {
                 static const uint8_t hrm_rgb_idx[] = {
-                    49, 50, 51, 52,  // Left HRMs
-                    55, 56, 57, 58   // Right HRMs
+                    15, 16, 17, 18,  // Left HRMs
+                    23, 24, 25, 26   // Right HRMs
                 };
 
                 SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
@@ -877,17 +870,17 @@ bool rgb_matrix_indicators_user(void) {
         case _NUMBER: {
             /** 3x3 keypad + 0: */
             static const uint8_t rgb_idx_number[] = {
-                39, 40, 41,
-                55, 56, 57,
-                71, 72, 73,
-                83
+                 9, 10, 11,
+                23, 24, 25,
+                35, 36, 37,
+                44
             };
 
             SET_RGB_COLOR(rgb_idx_number, rgb_green);
 
             /** Set diff color for HRMs */
             static const uint8_t hrm_rgb_idx[] = {
-                49, 50, 51, 52,  // Left HRMs
+                15, 16, 17, 18,  // Left HRMs
             };
 
             SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
@@ -901,9 +894,9 @@ bool rgb_matrix_indicators_user(void) {
         case _FUNCTION: {
             /** F1-F12: */
             static const uint8_t rgb_idx_funcs[] = {
-                39, 40, 41, 42,
-                55, 56, 57, 58,
-                71, 72, 73, 74
+                 9, 10, 11, 12,
+                23, 24, 25, 26,
+                35, 36, 37, 38
             };
 
             SET_RGB_COLOR(rgb_idx_funcs, rgb_orange);
@@ -922,10 +915,44 @@ bool rgb_matrix_indicators_user(void) {
 
             /** Set diff color for HRMs */
             static const uint8_t hrm_rgb_idx[] = {
-                49, 50, 51, 52,  // Left HRMs
+                15, 16, 17, 18,  // Left HRMs
             };
 
             SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
+
+            break;
+        }
+
+        // ---------------------------------------------------------------
+        // MAGIC
+        // ---------------------------------------------------------------
+        case _MAGIC: {
+            /** Bluetooth */
+            /** Keychron's BT_HST1/2/3 */
+            static const uint8_t rgb_idx_bluetooth[] = {
+                1, 2, 3
+            };
+
+            SET_RGB_COLOR(rgb_idx_bluetooth, rgb_blue);
+
+            /** Wireless 2.4 G */
+            /** Keychron's P2P4G */
+            rgb_matrix_set_color(4, rgb_green.r, rgb_green.g, rgb_green.b);
+
+            /** RGB Toggle */
+            rgb_matrix_set_color(0, rgb_pink.r, rgb_pink.g, rgb_pink.b);
+            
+            /** RGB Brightness/Saturation/Hue */
+            static const uint8_t rgb_idx_rgb_ctrl_increase[] = {
+                15, 16, 17
+            };
+
+            static const uint8_t rgb_idx_rgb_ctrl_decrease[] = {
+                29, 30, 31
+            };
+
+            SET_RGB_COLOR(rgb_idx_rgb_ctrl_increase, rgb_green);
+            SET_RGB_COLOR(rgb_idx_rgb_ctrl_decrease, rgb_red);
 
             break;
         }
@@ -936,20 +963,27 @@ bool rgb_matrix_indicators_user(void) {
         case _CURSOR: {
             /** Cursor/editing keys. */
             static const uint8_t rgb_idx_cursor[] = {
-                /** 37, 53, 68,       // Cut, Copy, Paste */
-                /** 54, 55, 56, 57,   // Arow keys (hjkl) */
-                /** 55, 56, 57, 58,   // Arow keys (jkl;) */
-                55, 56, 57, 40,   // Arow keys (jkli)
+                /** 22, 23, 24, 25   // Arow keys (hjkl) */
+                /** 23, 24, 25, 26,  // Arow keys (jkl;) */
+                23, 24, 25, 10,      // Arow keys (jkli)
             };
 
             SET_RGB_COLOR(rgb_idx_cursor, rgb_purple);
 
             /** Set diff color for HRMs */
             static const uint8_t hrm_rgb_idx[] = {
-                49, 50, 51, 52,  // Left HRMs
+                15, 16, 17, 18,  // Left HRMs
             };
 
             SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
+            
+            /** Set diff color for CUT/COPY/PASTE */
+            /** CUT */
+            rgb_matrix_set_color(30, rgb_red.r, rgb_red.g, rgb_red.b);
+            /** COPY */
+            rgb_matrix_set_color(31, rgb_orange.r, rgb_orange.g, rgb_orange.b);
+            /** PASTE */
+            rgb_matrix_set_color(32, rgb_green.r, rgb_green.g, rgb_green.b);
 
             break;
         }
@@ -961,13 +995,13 @@ bool rgb_matrix_indicators_user(void) {
         {
             /** Left, Down, Up, Right. */
             static const uint8_t rgb_idx_gaming[] = {
-                    40,          // Up
-                55, 56, 57,    // Left Down Right
+                    10,         // Up
+                23, 24, 25,     // Left Down Right
 
-                81,             // LSPC
+                41,             // LSPC
 
-                34,             // W
-                49, 50, 51      // A S D
+                     2,         // W
+                15, 16, 17      // A S D
             };
 
             SET_RGB_COLOR(rgb_idx_gaming, rgb_red);
@@ -984,43 +1018,39 @@ bool rgb_matrix_indicators_user(void) {
             // Use Sunsau's red (quotes), green (arrows), blue (groups), purple (flips), and yellow (Vim) colors for symbols
             /** Quotes keys LED Colors  **/
             static const uint8_t led_idx_sym_quotes[] = {
-                54, 59,
-                71, 72, 73
+                0,
             };
 
             SET_RGB_COLOR(led_idx_sym_quotes, rgb_pink);
 
             /** Arrows keys LED Colors  **/
             static const uint8_t led_idx_sym_arrows[] = {
-                50,
-                64, 66, 67, 68,
-                54,
+                16,
+                33,
             };
 
             SET_RGB_COLOR(led_idx_sym_arrows, rgb_green);
 
             /** Groups keys LED Colors  **/
             static const uint8_t led_idx_sym_groups[] = {
-                33, 34, 35, 36,
-                38,
-                70
+                29, 32
             };
 
             SET_RGB_COLOR(led_idx_sym_groups, rgb_cyan);
 
             /** Flips keys LED Colors  **/
             static const uint8_t led_idx_sym_flips[] = {
-                32,
-                63,
-                74
+                8,
+                22,
+                44
             };
 
             SET_RGB_COLOR(led_idx_sym_flips, rgb_purple);
 
             /** VIM keys LED Colors  **/
             static const uint8_t led_idx_sym_vim[] = {
-                48, 49, 52, 53,
-                80, 81
+                14, 15, 18, 19,
+                40, 41
 
             };
 
@@ -1028,16 +1058,14 @@ bool rgb_matrix_indicators_user(void) {
 
             /** Misc keys LED Colors  **/
             static const uint8_t led_idx_sym_misc[] = {
-                37,
-                51,
-                65
+                0,
             };
 
             SET_RGB_COLOR(led_idx_sym_misc, rgb_white);
 
             /** Set diff color for HRMs */
             static const uint8_t hrm_rgb_idx[] = {
-                55, 56, 57, 58   // Right HRMs
+                23, 24, 25, 26,  // Right HRMs
             };
 
             SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
@@ -1066,7 +1094,7 @@ bool rgb_matrix_indicators_user(void) {
     /** Change the color of  a specific key, whenever CG_TOGG is active. */
     if (keymap_config.swap_lctl_lgui) {
         /** LED 80 is the LALT/LCMD key. */
-        rgb_matrix_set_color(80, rgb_blue.r, rgb_blue.g, rgb_blue.b);
+        rgb_matrix_set_color(40, rgb_blue.r, rgb_blue.g, rgb_blue.b);
     }
 
     // ---------------------------------------------------------------

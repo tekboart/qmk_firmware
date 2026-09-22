@@ -20,3 +20,7 @@ OS_DETECTION_ENABLE = yes
 
 # Enable Tap Dance
 # TAP_DANCE_ENABLE = yes
+
+# Enable Split Keyboard Mode
+# https://docs.qmk.fm/features/split_keyboard#split-keyboard
+SPLIT_KEYBOARD = yes
