@@ -3,6 +3,9 @@ VIA_ENABLE = yes
 # [ME] Removing the lines enables VIA_INSECURE, which might allow keyloaggers to read your keystrokes. Use at your own risk.
 OPT_DEFS += -UVIA_INSECURE
 
+# Define the #layers in your keymap.c file.
+# DYNAMIC_KEYMAP_LAYER_COUNT = 11
+
 # Enable QMK's deferred execution for delayed mod activation--Needed for Home Row Mods to work properly.
 # https://sunaku.github.io/home-row-mods.html
 # https://github.com/manna-harbour/qmk_firmware/pull/56
