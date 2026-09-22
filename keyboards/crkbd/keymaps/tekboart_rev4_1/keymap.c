@@ -15,7 +15,6 @@
  */
 
 #include QMK_KEYBOARD_H
-#include "keychron_common.h"
 #include "os_detection.h"  // Detect OS Mode automatically
 
 enum layers {
