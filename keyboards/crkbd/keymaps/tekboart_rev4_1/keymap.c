@@ -30,6 +30,7 @@ enum layers {
     // NOTE: _FUNCTION must be placed as the last layer, as it may be used in many layers (if not all)--e.g., to enable/disable other layers (e.g., Gaming/Standard/etc.)
     // Refer to QMK's layer doc beginners guide: https://docs.qmk.fm/feature_layers#beginners 
     _FUNCTION,    // Function Layer (Split Layout). Hint: It's a combination of Function, Magic and Lower Layers in MoErgo
+    _MAGIC,       // Magic Layer (Split Layout). Hint: It mimics MoErgo's Magic Layer
 };
 
 // ###############################################################
@@ -92,6 +93,10 @@ void keyboard_post_init_user(void) {
 #define MO_FN   MO(_FUNCTION)
 #define TT_FN   TT(_FUNCTION)
 #define TG_FN   TG(_FUNCTION)
+// Magic Layer
+#define MO_MGC   MO(_MAGIC)
+#define TT_MGC   TT(_MAGIC)
+#define TG_MGC   TG(_MAGIC)
 // Number Layer
 #define LT_NUM  LT(_NUMBER, KC_SPC)
 #define TT_NUM  TT(_NUMBER)
@@ -639,7 +644,7 @@ void matrix_scan_user(void) {
 
 // Clear keymap template:
 /**
-    [<Layer_Name>] = LAYOUT_split_3x6_5(
+    [<Layer_Name>] = LAYOUT_split_3x6_3_ex2(
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
         _______,  _______,  _______,  _______,  _______,  _______,                      _______,  _______,  _______,  _______,  _______,  _______,
@@ -648,7 +653,7 @@ void matrix_scan_user(void) {
 */
 
 /**
-    [_FACTORY] = LAYOUT_split_3x6_5(
+    [_FACTORY] = LAYOUT_split_3x6_3_ex2(
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
         KC_ESC,   KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     XXXXXXX,  XXXXXXX,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
         KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
@@ -657,53 +662,60 @@ void matrix_scan_user(void) {
 */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [_BASE_SPL] = LAYOUT_split_3x6_5(
+    [_BASE_SPL] = LAYOUT_split_3x6_3_ex2(
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
-        KC_ESC,   HRM_A,    HRM_S,    HRM_S,    HRM_S,    HRM_G,    XXXXXXX,  XXXXXXX,  HRM_G,    HRM_G,    HRM_G,    HRM_G,    HRM_SCLN, KC_QUOT,
+        KC_ESC,   HRW_A,    HRW_S,    HRW_S,    HRW_S,    HRW_G,    MO_MGC,   XXXXXXX,  HRW_G,    HRW_G,    HRW_G,    HRW_G,    HRW_SCLN, KC_QUOT,
         KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
                                       LT_CSR,   LT_NUM,   KC_TAB,                       KC_ESC,   LT_SYM,   LT_FN
     ),
 
-    [_TYPING] = LAYOUT_split_3x6_5(
+    [_TYPING] = LAYOUT_split_3x6_3_ex2(
         _______,  _______,  _______,  _______,  _______,  _______,  XXXXXXX,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,
         _______,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     XXXXXXX,  XXXXXXX,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  _______,
         _______,  _______,  _______,  _______,  _______,  _______,                      _______,  _______,  _______,  _______,  _______,  _______,
                                       KC_BSPC,  KC_SPC,   KC_TAB,                       KC_ESC,   KC_DEL,   KC_ENT
     ),
 
-    [_SYMBOL] = LAYOUT_split_3x6_5(
+    [_SYMBOL] = LAYOUT_split_3x6_3_ex2(
         XXXXXXX,  SM_EXCL,  SM_LBRC,  SM_LCBR,  SM_RCBR,  KC_RBRC,  XXXXXXX,  XXXXXXX,  SM_LPRN,  KC_BSPC,  KC_SPC,   KC_ENT,   KC_DEL,   KC_TAB,
         XXXXXXX,  SM_HASH,  SM_CRET,  SM_EQL,   SM_UNDS,  SM_DLR,   XXXXXXX,  XXXXXXX,  SM_TICK,  KC_RSFT,  KC_RCTL,  KC_RALT,  KC_RGUI,  MC_TICK,
         XXXXXXX,  SM_TILD,  SM_LPRN,  SM_PLUS,  SM_MINS,  SM_RPRN,                       SM_RPRN,  KC_BSPC,  KC_TAB,   KC_SPC,   KC_ENT,   KC_RSFT,
                                       SM_PERC,  SM_ADS,   _______,                       _______,  _______,  _______
     ),
 
-    [_NUMBER] = LAYOUT_split_3x6_5(
+    [_NUMBER] = LAYOUT_split_3x6_3_ex2(
         XXXXXXX,  _______,  KC_DEL,   KC_ENT,   KC_SPC,   KC_BSPC,  XXXXXXX,  XXXXXXX,  SM_LPRN,  KC_7,     KC_8,     KC_9,     SM_COLN,  SM_PERC,
         XXXXXXX,  KC_CALC,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  XXXXXXX,  XXXXXXX,  KC_DOT,   KC_4,     KC_5,     KC_6,     SM_MINS,  SM_PLUS,
         XXXXXXX,  _______,  SEL_ALL,  SEL_LNE,  SEL_WRD,  FIND,                         SM_RPRN,  KC_1,     KC_2,     KC_3,     SM_ASTR,  SM_SLSH,
                                       _______,  _______,  _______,                       KC_0,     _______,  _______
     ),
 
-    [_CURSOR] = LAYOUT_split_3x6_5(
+    [_CURSOR] = LAYOUT_split_3x6_3_ex2(
         WM_SWTCH, WM_CLOSE, WM_TCLS,  AP_FEXP,  RENAME,   SEL_ALL,  XXXXXXX,  XXXXXXX,  AP_FFOX,  UNDO,     KC_UP,    REDO,     KC_ESC,   KC_TAB,
         DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  XXXXXXX,  XXXXXXX,  AP_CHRM,  KC_LEFT,  KC_DOWN,  KC_RGHT,  XXXXXXX,  XXXXXXX,
         XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                      WM_NEW,   TX_HOME,  KC_PGDN,  KC_PGUP,  TX_END,   XXXXXXX,
                                       _______,  WM_SPOT,  _______,                      SEL_WRD,  _______,  _______
     ),
 
-    [_GAMING] = LAYOUT_split_3x6_5(
+    [_GAMING] = LAYOUT_split_3x6_3_ex2(
         XXXXXXX,  _______,  KC_W,     _______,  _______,  _______,  XXXXXXX,  XXXXXXX,  _______,  _______,  KC_UP,    _______,  _______,  _______,
         XXXXXXX,  KC_A,     KC_S,     KC_D,     _______,  _______,  XXXXXXX,  XXXXXXX,  KC_LEFT,  KC_DOWN,  KC_RGHT,  _______,  _______,  _______,
         KC_LCTL,  _______,  _______,  _______,  _______,  _______,                      _______,  _______,  _______,  _______,  _______,  _______,
                                       _______,  KC_SPC,   _______,                      KC_ENT,   _______,  _______
     ),
 
-    [_FUNCTION] = LAYOUT_split_3x6_5(
-        TG_STD,   BT_HST1,  BT_HST2,  BT_HST3,  P2P4G,    AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
+    [_FUNCTION] = LAYOUT_split_3x6_3_ex2(
+        TG_STD,   KC_VOLD,  KC_MUTE,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
         MT_CPCG,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  XXXXXXX,  XXXXXXX,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
         TG_TYP,   KC_MPRV,  KC_MPLY,  KC_MNXT,  UR_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
                                       TG_CSR,   TG_NUM,   TG_GAME,                      _______,  TG_SYM,   _______
+    ),
+
+    [_MAGIC] = LAYOUT_split_3x6_3_ex2(
+        XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
+        XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  _______,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
+        XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
+                                      XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  XXXXXXX,  XXXXXXX
     ),
 
 };
