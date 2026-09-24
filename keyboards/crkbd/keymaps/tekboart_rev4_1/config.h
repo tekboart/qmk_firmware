@@ -44,3 +44,22 @@
     #define RGBLIGHT_SAT_STEP 17
     #define RGBLIGHT_VAL_STEP 17
 #endif
+
+// Sync Layer State, so both halves know which layer is active.
+#define SPLIT_LAYER_STATE_ENABLE
+// Sync Host LED State (Caps Lock, Num Lock, etc.).
+#define SPLIT_LED_STATE_ENABLE
+// Mirror master matrix events to the slave.
+// Useful for features that react to key events, including cosmetic RGB.
+// #define SPLIT_TRANSPORT_MIRROR
+
+// -- CAPS WORD CONFIGURATION ---
+// https://docs.qmk.fm/features/caps-word
+#define CAPS_WORD_INVERT_ON_SHIFT  // Shift does not break CapsWord
+#define CAPS_WORD_IDLE_TIMEOUT 0  // default: 5 seconds. 0 disables timeout and caps word will stay active until you press a non-breaking key.
+// Activation methods:
+// Activate by pressing Left Shift + Right Shift
+#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
+// Activate by double tapping Left Shift
+#define DOUBLE_TAP_SHIFT_TURNS_ON_CAPS_WORD
+

@@ -1,18 +1,20 @@
-/* Copyright 2024 ~ 2026 @ Keychron (https://www.keychron.com)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+/*
+Copyright 2019 @foostan
+Copyright 2020 Drashna Jaelre <@drashna>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include QMK_KEYBOARD_H
 #include "os_detection.h"  // Detect OS Mode automatically
@@ -20,14 +22,19 @@
 enum layers {
     // TODO: BASE layers (e.g., Split, Typing, Standard, Gaming) must always be the lowest numbered layers.
     // I put a layer in betwwen so that MAC toggle selects Split Base layer and WIN toggle selects Standard Base layer.
-    _BASE_SPL,  // Split Layer (Base)
+    // Base Layers
+    _QWERTY_3R,  // Split Layer (Base)
+    /** _BASE_STD,  // Standard QWERTY Layer (Base): Disable all HRMs & Split Layout. Useful for keyboards with more than 3 rows. */
+    // Overlay Layers (on top of Base Layers)
     _TYPING,    // Typing Layer (Base): Disable all HRMs.
-    _BASE_STD,  // Standard QWERTY Layer (Base): Disable all HRMs & Split Layout.
     _GAMING,   // Gaming Layer
     _SYMBOL,   // Symbols Layer (Split Layout)
-    _NUMBER,   // Number/Numpad Layer (Split Layout)
+    _NAVIGATE, // Navigation Layer (Split Layout)
     _CURSOR,   // Cursor Layer (Split Layout)
-    // NOTE: _FUNCTION must be placed as the last layer, as it may be used in many layers (if not all)--e.g., to enable/disable other layers (e.g., Gaming/Standard/etc.)
+    _MOUSE,    // Mouse Layer (Split Layout)
+    _NUMBER,   // Number/Numpad Layer (Split Layout)
+    // Shared Layers (accessed from Base and Overlay Layers)
+    // NOTE: _FUNCTION and MAGIC must be placed as the last layers.
     // Refer to QMK's layer doc beginners guide: https://docs.qmk.fm/feature_layers#beginners 
     _FUNCTION,    // Function Layer (Split Layout). Hint: It's a combination of Function, Magic and Lower Layers in MoErgo
     _MAGIC,       // Magic Layer (Split Layout). Hint: It mimics MoErgo's Magic Layer
@@ -46,12 +53,12 @@ static bool is_windows_mode(void) {
     return !keymap_config.swap_lctl_lgui;
 }
 
-void keyboard_post_init_user(void) {
+// detect the host OS and turn on/off CG_TOGG (swap_lctl_lgui) accordingly
+void detect_host_os_and_set_cg_togg(void) {
     // Options: OS_UNSURE OS_LINUX OS_WINDOWS OS_MACOS OS_IOS
-    // TODO: Test if it works
+    // FIXME: Test if it works
     os_variant_t OPERATING_SYSTEM = detected_host_os();
 
-    // If it is MacOS, turn on CG_TOGG
     if (OPERATING_SYSTEM == OS_MACOS || OPERATING_SYSTEM == OS_IOS) {
         keymap_config.swap_lctl_lgui = true;
         eeconfig_update_keymap(&keymap_config);
@@ -71,23 +78,44 @@ void keyboard_post_init_user(void) {
         eeconfig_update_keymap(&keymap_config);
     }
 }
+// turn on NUMLOCK by default
+void numlock_on(void) {
+    if (!host_keyboard_led_state().num_lock) {
+        tap_code(KC_NUM_LOCK);
+    }
+}
+
+// global variables for the numlock_on func
+static bool numlock_pending = false;
+static uint16_t numlock_timer = 0;
+#define NUMLOCK_STARTUP_DELAY 1000
+
+/** This function runs "exactly" once when the keyboard is powered on or reset. */
+void keyboard_post_init_user(void) {
+    detect_host_os_and_set_cg_togg();
+
+    // Wait until the host connection is established before
+    // attempting to enable Num Lock.
+    numlock_pending = true;
+    numlock_timer = timer_read();
+}
 
 // ---------------------------------------------------------------
 // Define Aliases
 // ---------------------------------------------------------------
 // ------- Define Aliases: Layers  -------
-// (Base) Split Layer
-#define TT_BASE TT(_BASE_SPL)
-#define TG_BASE TG(_BASE_SPL)
-#define DF_BASE DF(_BASE_SPL)
+// (Base) QWERTY 3-Row Layout
+#define TT_BASE TT(_QWERTY_3R)
+#define TG_BASE TG(_QWERTY_3R)
+#define DF_BASE DF(_QWERTY_3R)
+// (Base) QWERTY 6-Row Layout
+/** #define LT_STD  LT(_BASE_STD, KC_4) */
+/** #define TT_STD  TT(_BASE_STD) */
+/** #define TG_STD  TG(_BASE_STD) */
+/** #define DF_STD  DF(_BASE_STD) */
 // Typing Layer
 #define TT_TYP TT(_TYPING)
 #define TG_TYP TG(_TYPING)
-// Standard Layout
-#define LT_STD  LT(_BASE_STD, KC_4)
-#define TT_STD  TT(_BASE_STD)
-#define TG_STD  TG(_BASE_STD)
-#define DF_STD  DF(_BASE_STD)
 // Function Layer
 #define LT_FN   LT(_FUNCTION, KC_ENT)
 #define MO_FN   MO(_FUNCTION)
@@ -98,7 +126,7 @@ void keyboard_post_init_user(void) {
 #define TT_MGC   TT(_MAGIC)
 #define TG_MGC   TG(_MAGIC)
 // Number Layer
-#define LT_NUM  LT(_NUMBER, KC_SPC)
+#define LT_NUM  LT(_NUMBER, KC_BSPC)
 #define TT_NUM  TT(_NUMBER)
 #define TG_NUM  TG(_NUMBER)
 // Gaming Layer
@@ -106,14 +134,24 @@ void keyboard_post_init_user(void) {
 #define TT_GAME  TT(_GAMING)
 #define TG_GAME  TG(_GAMING)
 // Symbol Layer
-#define LT_SYM  LT(_SYMBOL, KC_DEL)
+#define LT_SYM  LT(_SYMBOL, KC_TAB)
 #define TT_SYM  TT(_SYMBOL)
 #define TG_SYM  TG(_SYMBOL)
 // Cursor Layer
-#define LT_CSR   LT(_CURSOR, KC_BSPC)
+#define LT_CSR   LT(_CURSOR, KC_ESC)
 #define MO_CSR   MO(_CURSOR)
 #define TT_CSR   TT(_CURSOR)
 #define TG_CSR   TG(_CURSOR)
+// Navigation Layer
+#define LT_NAV   LT(_NAVIGATE, KC_SPC)
+#define MO_NAV   MO(_NAVIGATE)
+#define TT_NAV   TT(_NAVIGATE)
+#define TG_NAV   TG(_NAVIGATE)
+// Mouse Layer
+#define LT_MSE   LT(_MOUSE, KC_TAB)
+#define MO_MSE   MO(_MOUSE)
+#define TT_MSE   TT(_MOUSE)
+#define TG_MSE   TG(_MOUSE)
 
 // ------- Define Aliases: Mod-Tap Keys  -------
 #define MT_LSFT MT(MOD_LSFT,KC_LBRC)
@@ -195,6 +233,12 @@ void keyboard_post_init_user(void) {
 #define SEL_LNU SELECT_LINE_UP
 
 // ---------------------------------------------------------------
+// Define Aliases: App Shortcuts
+// ---------------------------------------------------------------
+#define SCUT_FFOX  MEH(KC_1)  // Open Firefox Browser
+#define URL_AI_CHATBOT "https://chat.openai.com/chat"
+
+// ---------------------------------------------------------------
 // Define Custom Keycodes (e.g., Macros, OS-specific Window Management, etc.)
 // ---------------------------------------------------------------
 enum custom_keycodes {
@@ -231,8 +275,7 @@ enum custom_keycodes {
     TX_END,
      
     // Mod-Tap Keys: MT_<HOLD><TAP>
-    MT_CGLR,  // Tap: Swap Ctrl and GUI, Hold: Toggle Layer
-    MT_CPCG,  // Tap: CAPS LOCK, Hold: LSHIFT
+    MT_TEMPLATE  // Tap: <Action_A>, Hold: <Action_B>
 
     // Tap Dance Keys: TD_<TAP_DANCE>
     /** TD_SFT,  // Tap: OSM(MOD_LSFT), Hold: KC_LSFT, Double Tap: KC_CAPS */
@@ -269,7 +312,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // -------------------------------------------------------
         // App Switch
         // -------------------------------------------------------
-        // FIX: It was working before, but now we have a sticky Ctl (that needs keyboard disconnect to disable)
+        // FIXME: It was working before, but now we have a sticky Ctl (that needs keyboard disconnect to disable)
         case WM_SWTCH:
             if (record->event.pressed) {
                 // First press: start the app switcher.
@@ -494,9 +537,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case AP_FFOX:
             if (record->event.pressed) {
                 if (is_windows_mode()) {
-                    tap_code16(MEH(KC_1));
+                    tap_code16(SCUT_FFOX);
                 } else {
-                    tap_code16(MEH(KC_1));
+                    tap_code16(SCUT_FFOX);
                 }
             }
             return false;
@@ -531,12 +574,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // URLs/Websites
         // #######################################################
         // ------------------------------------------------------
-        // Open ChatGPT in a browser (e.g., Firefox)
+        // Open AI chatbot in a browser (e.g., Firefox)
         // ------------------------------------------------------
         case UR_GPT:
             if (record->event.pressed) {
                 // Launch Firefox using existing Firefox shortcut.
-                tap_code16(AP_FFOX);
+                tap_code16(SCUT_FFOX);
 
                 // Allow Firefox to start/focus.
                 wait_ms(1200);
@@ -546,10 +589,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 wait_ms(50);
 
                 // Enter URL and navigate.
-                SEND_STRING("https://chatgpt.com/");
+                SEND_STRING(URL_AI_CHATBOT);
                 tap_code(KC_ENT);
             }
-            break;
+            return false;
 
         // #######################################################
         // Macros
@@ -561,56 +604,32 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (record->event.pressed) {
                 SEND_STRING("```");
             }
-            break;
+            return false;
 
         // #######################################################
         // Misc
         // #######################################################
         // -------------------------------------------------------
-        // TAP-HOLD (Tap: Swap Ctrl and GUI, Hold: Toggle Layer)
+        // TAP-HOLD (Tap: <Action_A> | Hold: <Action_B>
         // -------------------------------------------------------
-        case MT_CGLR:
-            static uint16_t MT_CGLR_timer = 0;  // Timer variable to track key press duration
-            if (record->event.pressed) {
-                // Start the timer when the key is pressed.
-                MT_CGLR_timer = timer_read();
-            } else {
-                // Calculate the elapsed time since the key was pressed.
-                uint16_t elapsed_time = timer_elapsed(MT_CGLR_timer);
-
-                // If the key was held for less than 200ms, treat it as a tap
-                if (elapsed_time < 200) {
-                    keymap_config.swap_lctl_lgui = !keymap_config.swap_lctl_lgui;
-                    eeconfig_update_keymap(&keymap_config);
-                } else {
-                    // If held for 200ms or more, treat it as a hold
-                    layer_invert(_GAMING);
-                }
-            }
-            return false;
-
-        // -------------------------------------------------------
-        // TAP-HOLD (Tap: CAPS LOCK, Hold: LSHIFT)
-        // -------------------------------------------------------
-        case MT_CPCG:
-            static uint16_t MT_CPCG_timer = 0;  // Timer variable to track key press duration
-            if (record->event.pressed) {
-                // Start the timer when the key is pressed.
-                MT_CPCG_timer = timer_read();
-            } else {
-                // Calculate the elapsed time since the key was pressed.
-                uint16_t elapsed_time = timer_elapsed(MT_CPCG_timer);
-
-                // If the key was held for less than 200ms, treat it as a tap
-                if (elapsed_time < 200) {
-                    tap_code(KC_CAPS);
-                } else {
-                    // If held for 200ms or more, treat it as a hold
-                    keymap_config.swap_lctl_lgui = !keymap_config.swap_lctl_lgui;
-                    eeconfig_update_keymap(&keymap_config);
-                }
-            }
-            return false;
+        /** case MT_TEMPLATE: */
+        /**     static uint16_t MT_timer = 0;  // Timer variable to track key press duration */
+        /**     if (record->event.pressed) { */
+        /**         // Start the timer when the key is pressed. */
+        /**         MT_timer = timer_read(); */
+        /**     } else { */
+        /**         // Calculate the elapsed time since the key was pressed. */
+        /**         uint16_t elapsed_time = timer_elapsed(MT_timer); */
+        /**  */
+        /**         if (elapsed_time < 200) { */
+        /**             // If the key was held for less than 200ms, treat it as a tap */
+        /**             // Do Action A */
+        /**         } else { */
+        /**             // If held for 200ms or more, treat it as a hold */
+        /**             // Do Action B */
+        /**         } */
+        /**     } */
+        /**     return false; */
 
         // #######################################################
         // Tap Dance
@@ -623,7 +642,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 /** This function gets called at every matrix scan, which is basically as often as the MCU can handle. */
 /** Be careful what you put here, as it will get run a lot--even when user doesn't type. */
 void matrix_scan_user(void) {
+    // -------------------------------------------------------
+    // Num Lock startup
+    // -------------------------------------------------------
+    if (numlock_pending &&
+        timer_elapsed(numlock_timer) >= NUMLOCK_STARTUP_DELAY) {
+
+        numlock_pending = false;
+
+        if (!host_keyboard_led_state().num_lock) {
+            tap_code(KC_NUM_LOCK);
+        }
+    }
+
+    // -------------------------------------------------------
     // App Switcher (CMD+TAB) Timeout Handling
+    // -------------------------------------------------------
     if (app_switch_active &&
         timer_elapsed(app_switch_timer) >= APP_SWITCH_TIMEOUT) {
 
@@ -636,6 +670,42 @@ void matrix_scan_user(void) {
         }
     }
 }
+
+// ------------------------------------------------------
+// Customize CAPS WORD behavior
+// ------------------------------------------------------
+bool caps_word_press_user(uint16_t keycode) {
+    switch (keycode) {
+        // Keycodes that continue Caps Word, with shift applied.
+        case KC_A ... KC_Z:
+        /** case KC_MINS: */
+            add_weak_mods(MOD_BIT(KC_LSFT));  // Apply shift to next key.
+            return true;
+
+        // Keycodes that continue Caps Word, without shifting.
+        // Numbers
+        case KC_1 ... KC_0:
+        // symbols on the base layer
+        case KC_MINS:
+        case KC_UNDS:
+        case KC_COMM:
+        case KC_DOT:
+        case KC_SLSH:
+        case KC_BSLS:
+        case KC_SCLN:
+        case KC_QUOT:
+        case KC_LBRC:
+        case KC_RBRC:
+        // Text Editing keys
+        case KC_BSPC:
+        case KC_DEL:
+            return true;
+
+        default:
+            return false;  // Deactivate Caps Word.
+    }
+}
+
 
 // ------------------------------------------------------
 // Keymap Layout Configuration
@@ -662,67 +732,81 @@ void matrix_scan_user(void) {
 */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-[_BASE_SPL] = LAYOUT_split_3x6_3_ex2(
-    KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
-    KC_ESC,   HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,    MO_MGC,   XXXXXXX,  HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,
-    XXXXXXX,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  XXXXXXX,
-                                  LT_NUM,   LT_CSR,   KC_TAB,                       KC_ESC,   LT_SYM,   LT_FN
+[_QWERTY_3R] = LAYOUT_split_3x6_3_ex2(
+    KC_LBRC,  KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_RBRC,
+    KC_ESC,   HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,    MO_MGC,   MO_MGC,   HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,
+    ST_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_BSLS,
+                                  MO_CSR,   LT_NUM,   LT_NAV,                       LT_SYM,   LT_FN,    MO_MSE
 ),
 
-[_BASE_STD] = LAYOUT_split_3x6_3_ex2(
-    KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
-    KC_ESC,   KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     MO_MGC,   XXXXXXX,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
-    KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
-                                  KC_LCTL,  KC_LGUI,  KC_LALT,                      KC_SPC,   KC_RALT,  MO_FN
-),
+/** [_BASE_STD] = LAYOUT_split_3x6_3_ex2( */
+/**     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS, */
+/**     KC_ESC,   KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     MO_MGC,   MO_MGC,   KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT, */
+/**     KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT, */
+/**                                   KC_LCTL,  KC_LGUI,  KC_LALT,                      KC_SPC,   KC_RALT,  MO_FN */
+/** ), */
 
 [_TYPING] = LAYOUT_split_3x6_3_ex2(
     _______,  _______,  _______,  _______,  _______,  _______,  XXXXXXX,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,
-    _______,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     XXXXXXX,  XXXXXXX,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  _______,
+    _______,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     _______,  _______,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  _______,
     _______,  _______,  _______,  _______,  _______,  _______,                      _______,  _______,  _______,  _______,  _______,  _______,
-                                  KC_BSPC,  KC_SPC,   KC_TAB,                       KC_ESC,   KC_DEL,   KC_ENT
-),
-
-[_SYMBOL] = LAYOUT_split_3x6_3_ex2(
-    XXXXXXX,  SM_EXCL,  SM_LBRC,  SM_LCBR,  SM_RCBR,  KC_RBRC,  XXXXXXX,  XXXXXXX,  SM_LPRN,  KC_BSPC,  KC_SPC,   KC_ENT,   KC_DEL,   KC_TAB,
-    XXXXXXX,  SM_HASH,  SM_CRET,  SM_EQL,   SM_UNDS,  SM_DLR,   XXXXXXX,  XXXXXXX,  SM_TICK,  KC_RSFT,  KC_RCTL,  KC_RALT,  KC_RGUI,  MC_TICK,
-    XXXXXXX,  SM_TILD,  SM_LPRN,  SM_PLUS,  SM_MINS,  SM_RPRN,                       SM_RPRN,  KC_BSPC,  KC_TAB,   KC_SPC,   KC_ENT,   KC_RSFT,
-                                  SM_PERC,  SM_ADS,   _______,                       _______,  _______,  _______
-),
-
-[_NUMBER] = LAYOUT_split_3x6_3_ex2(
-    XXXXXXX,  _______,  KC_DEL,   KC_ENT,   KC_SPC,   KC_BSPC,  XXXXXXX,  XXXXXXX,  SM_LPRN,  KC_7,     KC_8,     KC_9,     SM_COLN,  SM_PERC,
-    XXXXXXX,  KC_CALC,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  XXXXXXX,  XXXXXXX,  KC_DOT,   KC_4,     KC_5,     KC_6,     SM_MINS,  SM_PLUS,
-    XXXXXXX,  _______,  SEL_ALL,  SEL_LNE,  SEL_WRD,  FIND,                         SM_RPRN,  KC_1,     KC_2,     KC_3,     SM_ASTR,  SM_SLSH,
-                                  _______,  _______,  _______,                       KC_0,     _______,  _______
-),
-
-[_CURSOR] = LAYOUT_split_3x6_3_ex2(
-    WM_SWTCH, WM_CLOSE, WM_TCLS,  AP_FEXP,  RENAME,   SEL_ALL,  XXXXXXX,  XXXXXXX,  AP_FFOX,  UNDO,     KC_UP,    REDO,     KC_ESC,   KC_TAB,
-    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  XXXXXXX,  XXXXXXX,  AP_CHRM,  KC_LEFT,  KC_DOWN,  KC_RGHT,  XXXXXXX,  XXXXXXX,
-    XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                      WM_NEW,   TX_HOME,  KC_PGDN,  KC_PGUP,  TX_END,   XXXXXXX,
-                                  _______,  WM_SPOT,  _______,                      SEL_WRD,  _______,  _______
+                                  _______,  _______,  _______,                      _______,  _______,  _______
 ),
 
 [_GAMING] = LAYOUT_split_3x6_3_ex2(
-    XXXXXXX,  _______,  KC_W,     _______,  _______,  _______,  XXXXXXX,  XXXXXXX,  _______,  _______,  KC_UP,    _______,  _______,  _______,
-    XXXXXXX,  KC_A,     KC_S,     KC_D,     _______,  _______,  XXXXXXX,  XXXXXXX,  KC_LEFT,  KC_DOWN,  KC_RGHT,  _______,  _______,  _______,
-    KC_LCTL,  _______,  _______,  _______,  _______,  _______,                      _______,  _______,  _______,  _______,  _______,  _______,
-                                  _______,  KC_SPC,   _______,                      KC_ENT,   _______,  _______
+    KC_M,     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     XXXXXXX,  XXXXXXX,  _______,  _______,  KC_UP,    _______,  _______,  _______,
+    KC_I,     KC_LSFT,  KC_A,     KC_S,     KC_D,     KC_F,     _______,  _______,  _______,  KC_LEFT,  KC_DOWN,  KC_RGHT,  _______,  _______,
+    KC_G,     KC_LCTL,  KC_Z,     KC_X,     KC_C,     KC_V,                         _______,  _______,  _______,  _______,  _______,  _______,
+                                  _______,  _______,  _______,                      _______,  _______,  _______
+),
+
+[_SYMBOL] = LAYOUT_split_3x6_3_ex2(
+    SM_EXCL,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     XXXXXXX,  XXXXXXX,  KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     XXXXXXX,
+    SM_HASH,  SM_CRET,  SM_EQL,   SM_UNDS,  SM_DLR,   SM_ASTR,  _______,  _______,  XXXXXXX,  KC_RSFT,  KC_RCTL,  KC_RALT,  KC_RGUI,  MC_TICK,
+    SM_AMPS,  SM_LT,    SM_PIPE,  SM_MINS,  SM_GT,    SM_PLUS,                      KC_TAB,   KC_SPC,   KC_ENT,   KC_BSPC,  KC_DEL,   _______,
+                                  _______,  SM_PERC,  SM_ADS,                       _______,  _______,  _______
+),
+
+[_NAVIGATE] = LAYOUT_split_3x6_3_ex2(
+    XXXXXXX,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     XXXXXXX,  XXXXXXX,  KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     XXXXXXX,
+    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  KC_MEH,   _______,  _______,  KC_HOME,  KC_LEFT,  KC_DOWN,  KC_UP,    KC_RGHT,  KC_END,
+    XXXXXXX,  SEL_ALL,  SEL_WRD,  SEL_LNE,  _______,  _______,                      SM_LBRC,  SM_LCBR,  SM_LPRN,  SM_RPRN,  SM_RCBR,  SM_RBRC,
+                                  _______,  _______,  _______,                      SM_TILD,  SM_TICK,  _______
+),
+
+[_CURSOR] = LAYOUT_split_3x6_3_ex2(
+    WM_SWTCH, WM_CLOSE, WM_TCLS,  AP_FEXP,  RENAME,   WM_NEW,   XXXXXXX,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,
+    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  FIND,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+    _______,  UNDO,     CUT,      COPY,     PASTE,    _______,                      _______,  _______,  _______,  _______,  _______,  _______,
+                                  _______,  _______,  WM_SPOT,                      _______,  _______,  _______
+),
+
+[_NUMBER] = LAYOUT_split_3x6_3_ex2(
+    _______,  KC_DEL,   KC_BSPC,  KC_ENT,   KC_SPC,   KC_TAB,    XXXXXXX,  XXXXXXX,  KC_NUM,   KC_P7,   KC_P8,    KC_9,     SM_COLN,  SM_PERC,
+    KC_CALC,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  KC_MEH,    _______,  _______,  SM_LPRN,  KC_P4,   KC_P5,    KC_6,     SM_MINS,  SM_PLUS,
+    _______,  SEL_ALL,  SEL_LNE,  SEL_WRD,  FIND,     XXXXXXX,                       SM_RPRN,  KC_P1,   KC_P2,    KC_3,     SM_ASTR,  SM_SLSH,
+                                  _______,  _______,  _______,                       KC_P0,    KC_PDOT, XXXXXXX
+),
+
+[_MOUSE] = LAYOUT_split_3x6_3_ex2(
+    _______,  _______,  _______,  MS_WHLU,  _______,  _______,  XXXXXXX,  XXXXXXX,  _______,  _______,  MS_UP,    _______,  _______,  _______,
+    _______,  _______,  MS_WHLL,  MS_WHLD,  MS_WHLR,  _______,  _______,  _______,  _______,  MS_LEFT,  MS_DOWN,  MS_RGHT,  _______,  _______,
+    _______,  _______,  MS_ACL0,  MS_ACL1,  MS_ACL2,  _______,                      _______,  MS_BTN1,  MS_BTN3,  MS_BTN2,  _______,  _______,
+                                  MS_BTN3,  MS_BTN1,  MS_BTN2,                      _______,  _______,  _______
 ),
 
 [_FUNCTION] = LAYOUT_split_3x6_3_ex2(
-    TG_STD,   KC_VOLD,  KC_MUTE,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
-    KC_CAPS,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  XXXXXXX,  XXXXXXX,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
+    XXXXXXX,  KC_VOLD,  KC_MUTE,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
+    KC_CAPS,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  _______,  _______,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
     TG_TYP,   KC_MPRV,  KC_MPLY,  KC_MNXT,  UR_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
-                                  TG_CSR,   TG_NUM,   TG_GAME,                      _______,  TG_SYM,   _______
+                                  XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  _______,  XXXXXXX
 ),
 
 [_MAGIC] = LAYOUT_split_3x6_3_ex2(
-    XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
-    XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  _______,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
-    XXXXXXX,  CG_TOGG,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
-                                  XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  XXXXXXX,  XXXXXXX
+    UG_TOGG,  BT_PRF1,  BT_PRF2,  BT_PRF3,  OU_2P4G,  OU_USB,   XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
+    QK_BOOT,  UG_HUEU,  UG_VALU,  UG_SATU,  XXXXXXX,  TG_GAME,  _______,  _______,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  QK_BOOT,
+    XXXXXXX,  UG_HUED,  UG_VALD,  UG_SATD,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  CG_TOGG,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
+                                  TG_CSR,   TG_NUM,   TG_NAV,                       TG_SYM,   TG_FN,    TG_MSE
 ),
 
 };
@@ -730,10 +814,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Define the encoder rotation map for each layer
 #ifdef ENCODER_MAP_ENABLE
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [_BASE_SPL]    = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_QWERTY_3R]    = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
     [_TYPING]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
-    [_BASE_STD]    = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    /** [_BASE_STD]    = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), }, */
     [_FUNCTION]    = { ENCODER_CCW_CW(UG_VALD, UG_VALU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_MAGIC]       = { ENCODER_CCW_CW(UG_VALD, UG_VALU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
     [_SYMBOL]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
     [_NUMBER]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
     [_CURSOR]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
@@ -747,10 +832,20 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 // NOTE: For split keyboards, the layout becomes vertical and indices jump between halves.
 // https://docs.qmk.fm/features/split_keyboard#layout-macro
 /**
+                  KEY INDEX MAP
+
     00 01 02 03 04 05 06    07 08 09 10 11 12 13
     14 15 16 17 18 19 20    21 22 23 24 25 26 27
     28 29 30 31 32 33          34 35 36 37 38 39
-                40 41 42    43 44 45
+             40 41 42          43 44 45
+------------------------------------------------------------
+                  LED INDEX MAP
+
+    18 17 12 11 04 03 21    44 26 27 34 35 40 41
+    19 16 13 10 05 02 22    45 25 28 33 36 39 42
+    20 15 14 09 06 01          24 29 32 37 38 43
+             08 07 00          23 30 31
+
 */
 
 // Set RGB color for an array of LED indices.
@@ -786,8 +881,8 @@ bool rgb_matrix_indicators_user(void) {
     hsv_t hsv_off = (hsv_t){0, 0, 0};
     rgb_t rgb_off = hsv_to_rgb(hsv_off);
 
-    hsv_t hsv_grey = (hsv_t){0, 0, val / 2};
-    rgb_t rgb_grey = hsv_to_rgb(hsv_grey);
+    /** hsv_t hsv_grey = (hsv_t){0, 0, val / 2}; */
+    /** rgb_t rgb_grey = hsv_to_rgb(hsv_grey); */
 
     hsv_t hsv_white = (hsv_t){0, 0, val};
     rgb_t rgb_white = hsv_to_rgb(hsv_white);
@@ -798,11 +893,15 @@ bool rgb_matrix_indicators_user(void) {
     hsv_t hsv_red = (hsv_t){0, 255, val};
     rgb_t rgb_red = hsv_to_rgb(hsv_red);
 
-    hsv_t hsv_pink = (hsv_t){0, 220, val};
+    /** hsv_t hsv_pink = (hsv_t){0, 220, val};  // Pink (Pale) */
+    hsv_t hsv_pink = (hsv_t){245, 255, val};  // Pink (Deep): Rose
     rgb_t rgb_pink = hsv_to_rgb(hsv_pink);
 
     hsv_t hsv_green = (hsv_t){85, 255, val};
     rgb_t rgb_green = hsv_to_rgb(hsv_green);
+
+    hsv_t hsv_lime = (hsv_t){100, 255, val};
+    rgb_t rgb_lime = hsv_to_rgb(hsv_lime);
 
     hsv_t hsv_blue = (hsv_t){170, 255, val};
     rgb_t rgb_blue = hsv_to_rgb(hsv_blue);
@@ -810,55 +909,65 @@ bool rgb_matrix_indicators_user(void) {
     hsv_t hsv_cyan = (hsv_t){150, 255, val};
     rgb_t rgb_cyan = hsv_to_rgb(hsv_cyan);
 
-    hsv_t hsv_orange = (hsv_t){20, 255, val};
-    rgb_t rgb_orange = hsv_to_rgb(hsv_orange);
+    /** hsv_t hsv_orange = (hsv_t){20, 255, val}; */
+    /** rgb_t rgb_orange = hsv_to_rgb(hsv_orange); */
+    hsv_t hsv_yellow = (hsv_t){43, 255, val};
+    rgb_t rgb_orange = hsv_to_rgb(hsv_yellow);
 
     hsv_t hsv_purple = (hsv_t){190, 255, val};
     rgb_t rgb_purple = hsv_to_rgb(hsv_purple);
 
+    /** Home Row Mods (HRMs) Color */
+    rgb_t rgb_hrm = hsv_to_rgb(hsv_blue);
+
+    // ---------------------------------------------------------------
+    // Setup RGB Lighting per Layer
+    // ---------------------------------------------------------------
     /** Turn off all RGB LEDs first. */
     rgb_matrix_set_color_all(rgb_off.r, rgb_off.g, rgb_off.b);
 
     /** Get the highest active layer. */
     uint8_t active_layer = get_highest_layer(layer_state | default_layer_state);
 
+    // ---------------------------------------------------------------
+    // Layer-Specific RGB Lighting
+    // ---------------------------------------------------------------
     switch (active_layer) {
 
         // ---------------------------------------------------------------
         // BASE STANDARD
         // ---------------------------------------------------------------
-        case _BASE_STD: {
-            rgb_matrix_set_color_all(
-                rgb_white_warm.r,
-                rgb_white_warm.g,
-                rgb_white_warm.b
-            );
-
-            break;
-        }
+        /** case _BASE_STD: { */
+        /**     rgb_matrix_set_color_all( */
+        /**         rgb_pink.r, */
+        /**         rgb_pink.g, */
+        /**         rgb_pink.b */
+        /**     ); */
+        /**  */
+        /**     break; */
+        /** } */
 
         // ---------------------------------------------------------------
         // BASE SPLIT / TYPING
         // ---------------------------------------------------------------
-        case _BASE_SPL:
+        case _QWERTY_3R:
         case _TYPING: {
             static const uint8_t base_spl_rgb_idx[] = {
-                 0,  1,  2,  3,  4,  5,  6,    7,  8,  9, 10, 11, 12, 13,
-                14, 15, 16, 17, 18, 19, 20,   21, 22, 23, 24, 25, 26, 27,
-                28, 29, 30, 31, 32, 33,           34, 35, 36, 37, 38, 39,
-                            40, 41, 42,           43, 44, 45
+                18, 17, 12, 11, 4, 3, 21,     44, 26, 27, 34, 35, 40, 41,
+                19, 16, 13, 10, 5, 2, 22,     45, 25, 28, 33, 36, 39, 42,
+                20, 15, 14,  9, 6, 1,             24, 29, 32, 37, 38, 43,
+                         8,  7, 0,                23, 30, 31
             };
 
             SET_RGB_COLOR(base_spl_rgb_idx, rgb_white_warm);
 
-            /** Set diff color for HRMs only on _BASE_SPL. */
-            if (active_layer == _BASE_SPL) {
+            /** Set diff color for HRMs only on _QWERTY_3R. */
+            if (active_layer == _QWERTY_3R) {
                 static const uint8_t hrm_rgb_idx[] = {
-                    15, 16, 17, 18,  // Left HRMs
-                    23, 24, 25, 26   // Right HRMs
+                    16, 13, 10, 5,  // Left HRMs
+                    28, 33, 36, 39   // Right HRMs
                 };
-
-                SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
+                SET_RGB_COLOR(hrm_rgb_idx, rgb_hrm);
             }
 
             break;
@@ -870,20 +979,23 @@ bool rgb_matrix_indicators_user(void) {
         case _NUMBER: {
             /** 3x3 keypad + 0: */
             static const uint8_t rgb_idx_number[] = {
-                 9, 10, 11,
-                23, 24, 25,
-                35, 36, 37,
-                44
+                27, 34, 35,
+                28, 33, 36,
+                29, 32, 37,
+                23, 30
             };
-
             SET_RGB_COLOR(rgb_idx_number, rgb_green);
 
             /** Set diff color for HRMs */
             static const uint8_t hrm_rgb_idx[] = {
-                15, 16, 17, 18,  // Left HRMs
+                16, 13, 10, 5  // Left HRMs
             };
+            SET_RGB_COLOR(hrm_rgb_idx, rgb_hrm);
 
-            SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
+            /** if Numlock in ON, Turn its key on */
+            if (host_keyboard_led_state().num_lock) {
+                rgb_matrix_set_color(26, rgb_red.r, rgb_red.g, rgb_red.b);
+            }
 
             break;
         }
@@ -894,31 +1006,28 @@ bool rgb_matrix_indicators_user(void) {
         case _FUNCTION: {
             /** F1-F12: */
             static const uint8_t rgb_idx_funcs[] = {
-                 9, 10, 11, 12,
-                23, 24, 25, 26,
-                35, 36, 37, 38
+                27, 34, 35, 38,
+                28, 33, 36, 39,
+                29, 32, 37, 40
             };
-
             SET_RGB_COLOR(rgb_idx_funcs, rgb_orange);
-
-            /** Bluetooth */
-            /** Keychron's BT_HST1/2/3 */
-            static const uint8_t rgb_idx_bluetooth[] = {
-                33, 34, 35
-            };
-
-            SET_RGB_COLOR(rgb_idx_bluetooth, rgb_blue);
-
-            /** Wireless 2.4 G */
-            /** Keychron's P2P4G */
-            rgb_matrix_set_color(36, rgb_green.r, rgb_green.g, rgb_green.b);
 
             /** Set diff color for HRMs */
             static const uint8_t hrm_rgb_idx[] = {
-                15, 16, 17, 18,  // Left HRMs
+                16, 13, 10, 5  // Left HRMs
             };
+            SET_RGB_COLOR(hrm_rgb_idx, rgb_hrm);
 
-            SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
+            /** Set diff color for Volume and Media control */
+            /** VOLDN/MPRV */
+            rgb_matrix_set_color(17, rgb_orange.r, rgb_orange.g, rgb_orange.b);
+            rgb_matrix_set_color(15, rgb_orange.r, rgb_orange.g, rgb_orange.b);
+            /** MUTE/MPLY */
+            rgb_matrix_set_color(12, rgb_red.r, rgb_red.g, rgb_red.b);
+            rgb_matrix_set_color(14, rgb_red.r, rgb_red.g, rgb_red.b);
+            /** VOLUP/MNXT */
+            rgb_matrix_set_color(11, rgb_green.r, rgb_green.g, rgb_green.b);
+            rgb_matrix_set_color(9, rgb_green.r, rgb_green.g, rgb_green.b);
 
             break;
         }
@@ -928,32 +1037,70 @@ bool rgb_matrix_indicators_user(void) {
         // ---------------------------------------------------------------
         case _MAGIC: {
             /** Bluetooth */
-            /** Keychron's BT_HST1/2/3 */
             static const uint8_t rgb_idx_bluetooth[] = {
-                1, 2, 3
+                17, 12, 11
             };
-
             SET_RGB_COLOR(rgb_idx_bluetooth, rgb_blue);
 
             /** Wireless 2.4 G */
-            /** Keychron's P2P4G */
             rgb_matrix_set_color(4, rgb_green.r, rgb_green.g, rgb_green.b);
 
             /** RGB Toggle */
-            rgb_matrix_set_color(0, rgb_pink.r, rgb_pink.g, rgb_pink.b);
+            rgb_matrix_set_color(18, rgb_purple.r, rgb_purple.g, rgb_purple.b);
             
             /** RGB Brightness/Saturation/Hue */
             static const uint8_t rgb_idx_rgb_ctrl_increase[] = {
-                15, 16, 17
+                16, 13, 10
             };
 
             static const uint8_t rgb_idx_rgb_ctrl_decrease[] = {
-                29, 30, 31
+                15, 14, 9
             };
-
             SET_RGB_COLOR(rgb_idx_rgb_ctrl_increase, rgb_green);
-            SET_RGB_COLOR(rgb_idx_rgb_ctrl_decrease, rgb_red);
+            SET_RGB_COLOR(rgb_idx_rgb_ctrl_decrease, rgb_orange);
 
+            /** Bootloader */
+            static const uint8_t rgb_idx_bootloader[] = {
+                19, 42
+            };
+            SET_RGB_COLOR(rgb_idx_bootloader, rgb_red);
+
+            /** Mac/Win Toggle (CG_TOGG) */
+            rgb_matrix_set_color(29, rgb_blue.r, rgb_blue.g, rgb_blue.b);
+
+            break;
+        }
+
+        // ---------------------------------------------------------------
+        // NAVIGATE
+        // ---------------------------------------------------------------
+        case _NAVIGATE: {
+            static const uint8_t rgb_idx_nav[] = {
+                28, 33, 36, 39      // Arow keys (jkl;)
+            };
+            SET_RGB_COLOR(rgb_idx_nav, rgb_purple);
+
+            /** Set diff color for HRMs */
+            static const uint8_t hrm_rgb_idx[] = {
+                16, 13, 10, 5  // Left HRMs
+            };
+            SET_RGB_COLOR(hrm_rgb_idx, rgb_hrm);
+
+            // Set color for the number row
+            static const uint8_t rgb_idx_num_row[] = {
+                17, 12, 11, 4, 3,     26, 27, 34, 35, 40
+            };
+            SET_RGB_COLOR(rgb_idx_num_row, rgb_red);
+
+            // Set color for DEL
+            rgb_matrix_set_color(19, rgb_red.r, rgb_red.g, rgb_red.b);
+
+            // Set color for Getreuer's Select_WORD keys (SEL_ALL, SEL_WRD, SEL_LNE, FIND)
+            static const uint8_t rgb_idx_gesture[] = {
+                15, 14, 9
+            };
+            SET_RGB_COLOR(rgb_idx_gesture, rgb_lime);
+            
             break;
         }
 
@@ -961,33 +1108,57 @@ bool rgb_matrix_indicators_user(void) {
         // CURSOR
         // ---------------------------------------------------------------
         case _CURSOR: {
-            /** Cursor/editing keys. */
-            static const uint8_t rgb_idx_cursor[] = {
-                /** 22, 23, 24, 25   // Arow keys (hjkl) */
-                /** 23, 24, 25, 26,  // Arow keys (jkl;) */
-                23, 24, 25, 10,      // Arow keys (jkli)
-            };
-
-            SET_RGB_COLOR(rgb_idx_cursor, rgb_purple);
-
             /** Set diff color for HRMs */
             static const uint8_t hrm_rgb_idx[] = {
-                15, 16, 17, 18,  // Left HRMs
+                16, 13, 10, 5  // Left HRMs
             };
+            SET_RGB_COLOR(hrm_rgb_idx, rgb_hrm);
 
-            SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
-            
-            /** Set diff color for CUT/COPY/PASTE */
+            /** Set diff color for CUT/COPY/PASTE/UNDO */
+            /** UNDO */
+            rgb_matrix_set_color(15, rgb_orange.r, rgb_orange.g, rgb_orange.b);
             /** CUT */
-            rgb_matrix_set_color(30, rgb_red.r, rgb_red.g, rgb_red.b);
+            rgb_matrix_set_color(14, rgb_red.r, rgb_red.g, rgb_red.b);
             /** COPY */
-            rgb_matrix_set_color(31, rgb_orange.r, rgb_orange.g, rgb_orange.b);
+            rgb_matrix_set_color(9, rgb_orange.r, rgb_orange.g, rgb_orange.b);
             /** PASTE */
-            rgb_matrix_set_color(32, rgb_green.r, rgb_green.g, rgb_green.b);
+            rgb_matrix_set_color(6, rgb_green.r, rgb_green.g, rgb_green.b);
+
+            // Set color for DEL
+            rgb_matrix_set_color(19, rgb_red.r, rgb_red.g, rgb_red.b);
 
             break;
         }
 
+        // ---------------------------------------------------------------
+        // MOUSE
+        // ---------------------------------------------------------------
+        case _MOUSE: {
+            static const uint8_t rgb_idx_nav[] = {
+                    34,
+                28, 33, 36
+            };
+            SET_RGB_COLOR(rgb_idx_nav, rgb_purple);
+
+            static const uint8_t rgb_idx_clicks[] = {
+                29, 32, 37,      // Left, Middle and Right Mouse Buttons
+                7, 0
+            };
+            SET_RGB_COLOR(rgb_idx_clicks, rgb_orange);
+
+            static const uint8_t rgb_idx_scroll[] = {
+                    11,
+                13, 10, 5
+            };
+            SET_RGB_COLOR(rgb_idx_scroll, rgb_blue);
+
+            /** Mouse Speed Control */
+            rgb_matrix_set_color(14, rgb_red.r, rgb_red.g, rgb_red.b);
+            rgb_matrix_set_color(9, rgb_orange.r, rgb_orange.g, rgb_orange.b);
+            rgb_matrix_set_color(6, rgb_green.r, rgb_green.g, rgb_green.b);
+
+            break;
+        }
         // ---------------------------------------------------------------
         // Gaming
         // ---------------------------------------------------------------
@@ -995,15 +1166,13 @@ bool rgb_matrix_indicators_user(void) {
         {
             /** Left, Down, Up, Right. */
             static const uint8_t rgb_idx_gaming[] = {
-                    10,         // Up
-                23, 24, 25,     // Left Down Right
+                    11,        //   W
+                13, 10, 5,     // A S D
 
-                41,             // LSPC
+                    34,        //      Up
+                28, 33, 36     // Left Down Right
 
-                     2,         // W
-                15, 16, 17      // A S D
             };
-
             SET_RGB_COLOR(rgb_idx_gaming, rgb_red);
 
             break;
@@ -1018,58 +1187,51 @@ bool rgb_matrix_indicators_user(void) {
             // Use Sunsau's red (quotes), green (arrows), blue (groups), purple (flips), and yellow (Vim) colors for symbols
             /** Quotes keys LED Colors  **/
             static const uint8_t led_idx_sym_quotes[] = {
-                0,
             };
-
             SET_RGB_COLOR(led_idx_sym_quotes, rgb_pink);
 
             /** Arrows keys LED Colors  **/
             static const uint8_t led_idx_sym_arrows[] = {
-                16,
-                33,
+                    13,
+                15, 14, 9, 6
             };
-
             SET_RGB_COLOR(led_idx_sym_arrows, rgb_green);
 
             /** Groups keys LED Colors  **/
             static const uint8_t led_idx_sym_groups[] = {
-                29, 32
+                24, 29, 32, 36, 37, 43
             };
-
             SET_RGB_COLOR(led_idx_sym_groups, rgb_cyan);
 
             /** Flips keys LED Colors  **/
             static const uint8_t led_idx_sym_flips[] = {
-                8,
-                22,
-                44
+                18
             };
-
             SET_RGB_COLOR(led_idx_sym_flips, rgb_purple);
 
             /** VIM keys LED Colors  **/
             static const uint8_t led_idx_sym_vim[] = {
-                14, 15, 18, 19,
-                40, 41
-
+                19, 16, 5, 2,
+                0, 7
             };
-
             SET_RGB_COLOR(led_idx_sym_vim, rgb_orange);
 
             /** Misc keys LED Colors  **/
             static const uint8_t led_idx_sym_misc[] = {
-                0,
             };
-
             SET_RGB_COLOR(led_idx_sym_misc, rgb_white);
 
             /** Set diff color for HRMs */
             static const uint8_t hrm_rgb_idx[] = {
-                23, 24, 25, 26,  // Right HRMs
+                28, 33, 36, 39   // Right HRMs
             };
+            SET_RGB_COLOR(hrm_rgb_idx, rgb_hrm);
 
-            SET_RGB_COLOR(hrm_rgb_idx, rgb_red);
-
+            // Set color for the number row
+            static const uint8_t rgb_idx_num_row[] = {
+                17, 12, 11, 4, 3,     26, 27, 34, 35, 40
+            };
+            SET_RGB_COLOR(rgb_idx_num_row, rgb_red);
 
             break;
         }
@@ -1079,9 +1241,9 @@ bool rgb_matrix_indicators_user(void) {
         // ---------------------------------------------------------------
         default: {
             rgb_matrix_set_color_all(
-                rgb_grey.r,
-                rgb_grey.g,
-                rgb_grey.b
+                rgb_pink.r,
+                rgb_pink.g,
+                rgb_pink.b
             );
 
             break;
@@ -1094,7 +1256,7 @@ bool rgb_matrix_indicators_user(void) {
     /** Change the color of  a specific key, whenever CG_TOGG is active. */
     if (keymap_config.swap_lctl_lgui) {
         /** LED 80 is the LALT/LCMD key. */
-        rgb_matrix_set_color(40, rgb_blue.r, rgb_blue.g, rgb_blue.b);
+        rgb_matrix_set_color(8, rgb_blue.r, rgb_blue.g, rgb_blue.b);
     }
 
     // ---------------------------------------------------------------
@@ -1102,8 +1264,24 @@ bool rgb_matrix_indicators_user(void) {
     // ---------------------------------------------------------------
     /** Change the Color of a specific key, when CAPS LOCK is active */
     if (host_keyboard_led_state().caps_lock) {
-        /** LED 48 is the CAPS LOCK key. */
-        rgb_matrix_set_color(48, rgb_blue.r, rgb_blue.g, rgb_blue.b);
+        rgb_matrix_set_color(19, rgb_red.r, rgb_red.g, rgb_red.b);
+    }
+
+    // ---------------------------------------------------------------
+    // CAPS WORD INDICATOR
+    // ---------------------------------------------------------------
+    if (is_caps_word_on()) {
+        // Single LED indicator
+        /** rgb_matrix_set_color(20, rgb_red.r, rgb_red.g, rgb_red.b); */
+        // Multiple LED indicator
+        static const uint8_t led_idx_caps_word[] = {
+                18, 17, 12, 11, 4, 3,     26, 27, 34, 35, 38, 43,
+                19, 16, 13, 10, 5, 2,     25, 28, 33, 36, 39, 42,
+                20, 15, 14,  9, 6, 1,     24, 29, 32, 37, 40, 41,
+        };
+        SET_RGB_COLOR(led_idx_caps_word, rgb_red);
+        // Whole Keyboard indicator
+        /** rgb_matrix_set_color_all(rgb_red.r, rgb_red.g, rgb_red.b); */
     }
 
     return false;
