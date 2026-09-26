@@ -1133,7 +1133,7 @@ bool rgb_matrix_indicators_user(void) {
 
             /** Symbol-Groups keys LED Colors  **/
             static const uint8_t led_idx_sym_groups[] = {
-                24, 29, 32, 36, 37, 43
+                24, 29, 32, 37, 38, 43
             };
             SET_RGB_COLOR(led_idx_sym_groups, rgb_cyan);
 
