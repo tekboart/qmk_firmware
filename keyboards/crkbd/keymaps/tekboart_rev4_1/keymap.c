@@ -799,7 +799,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_M,     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     XXXXXXX,  XXXXXXX,  _______,  _______,  KC_UP,    _______,  _______,  _______,
     KC_I,     KC_LSFT,  KC_A,     KC_S,     KC_D,     KC_F,     _______,  _______,  _______,  KC_LEFT,  KC_DOWN,  KC_RGHT,  _______,  _______,
     KC_G,     KC_LCTL,  KC_Z,     KC_X,     KC_C,     KC_V,                         _______,  _______,  _______,  _______,  _______,  _______,
-                                  _______,  _______,  _______,                      _______,  _______,  _______
+                                  XXXXXXX,  XXXXXXX,  KC_SPC,                       KC_ENT,   KC_ESC,  XXXXXXX
 ),
 
 [_SYMBOL] = LAYOUT_split_3x6_3_ex2(
@@ -912,14 +912,14 @@ static void set_rgb_color(
 
 // Change RGB Color per Layer
 bool rgb_matrix_indicators_user(void) {
+    /** Current RGB brightness--to be used alongside colors, so the brightness follows that of keyboard. */
+    uint8_t val = rgb_matrix_get_val();
 
     // ---------------------------------------------------------------
     // Define Aliases: Colors
     // ---------------------------------------------------------------
-    /** Current RGB brightness. */
-    uint8_t val = rgb_matrix_get_val();
 
-    /** Color Aliases */
+    /** Black/Off */
     hsv_t hsv_off = (hsv_t){0, 0, 0};
     rgb_t rgb_off = hsv_to_rgb(hsv_off);
 
@@ -942,21 +942,23 @@ bool rgb_matrix_indicators_user(void) {
     hsv_t hsv_green = (hsv_t){85, 255, val};
     rgb_t rgb_green = hsv_to_rgb(hsv_green);
 
-    hsv_t hsv_lime = (hsv_t){85, 101, val};
+    hsv_t hsv_lime = (hsv_t){64, 200, val};
     rgb_t rgb_lime = hsv_to_rgb(hsv_lime);
 
     hsv_t hsv_blue = (hsv_t){170, 255, val};
     rgb_t rgb_blue = hsv_to_rgb(hsv_blue);
 
-    hsv_t hsv_cyan = (hsv_t){150, 255, val};
+    /** hsv_t hsv_cyan = (hsv_t){150, 255, val}; */
+    hsv_t hsv_cyan = (hsv_t){127, 255, val};
     rgb_t rgb_cyan = hsv_to_rgb(hsv_cyan);
 
-    /** hsv_t hsv_orange = (hsv_t){20, 255, val}; */
-    /** rgb_t rgb_orange = hsv_to_rgb(hsv_orange); */
-    hsv_t hsv_yellow = (hsv_t){43, 255, val};
-    rgb_t rgb_orange = hsv_to_rgb(hsv_yellow);
+    hsv_t hsv_orange = (hsv_t){20, 255, val};
+    rgb_t rgb_orange = hsv_to_rgb(hsv_orange);
 
-    hsv_t hsv_purple = (hsv_t){190, 255, val};
+    /** hsv_t hsv_yellow = (hsv_t){43, 255, val}; */
+    /** rgb_t rgb_yellow = hsv_to_rgb(hsv_yellow); */
+
+    hsv_t hsv_purple = (hsv_t){191, 255, val};
     rgb_t rgb_purple = hsv_to_rgb(hsv_purple);
 
     /** Home Row Mods (HRMs) Color */
@@ -1142,6 +1144,16 @@ bool rgb_matrix_indicators_user(void) {
                 17, 12, 11, 4, 3,     26, 27, 34, 35, 40
             };
             SET_RGB_COLOR(rgb_idx_num_row, rgb_white_warm);
+
+            /** Set diff color for CUT/COPY/PASTE/UNDO */
+            /** UNDO */
+            rgb_matrix_set_color(15, rgb_orange.r, rgb_orange.g, rgb_orange.b);
+            /** CUT */
+            rgb_matrix_set_color(14, rgb_red.r, rgb_red.g, rgb_red.b);
+            /** COPY */
+            rgb_matrix_set_color(9, rgb_orange.r, rgb_orange.g, rgb_orange.b);
+            /** PASTE */
+            rgb_matrix_set_color(6, rgb_green.r, rgb_green.g, rgb_green.b);
 
             // Set color for DEL
             rgb_matrix_set_color(19, rgb_red.r, rgb_red.g, rgb_red.b);
