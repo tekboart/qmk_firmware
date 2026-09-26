@@ -5,15 +5,17 @@
 
 // --- Home Row Mods (HRMs) Configurations --- 
 // ME + Internet
+// Tapping Terms means: the minimum time (in milliseconds) that a key should e held down to be considered a hold, not a tap.
+#define TAPPING_TERM 200 // Default: 200 (ms)
 #define FLOW_TAP_TERM 150
 #define CHORDAL_HOLD
 /** #define PERMISSIVE_HOLD  // Bad for Legato typing style */
 /** #define SPECULATIVE_HOLD  // Bad for accidental modifier activation */
+#define TAPPING_TERM_PER_KEY // Allow different tapping terms for different keys, using get_tapping_term in keymap.c
 
+// --- Bilateral Combinations Configurations ---
 // https://sunaku.github.io/home-row-mods.html
 // https://github.com/manna-harbour/qmk_firmware/pull/56
-/* QMK */
-#define TAPPING_TERM 200
 // IGNORE_MOD_TAP_INTERRUPT is now the default behavior, hence uncommenting this.
 // #define IGNORE_MOD_TAP_INTERRUPT [> for rolling on mod-tap keys <]
 
@@ -27,24 +29,7 @@
 #define BILATERAL_COMBINATIONS_TYPING_STREAK_TIMEOUT 160  /* ms */
 #define BILATERAL_COMBINATIONS_TYPING_STREAK_MODMASK (~MOD_MASK_SHIFT)
 
-// --- RGB Effects ---
-#ifdef RGBLIGHT_ENABLE
-    #define RGBLIGHT_EFFECT_BREATHING
-    #define RGBLIGHT_EFFECT_RAINBOW_MOOD
-    #define RGBLIGHT_EFFECT_RAINBOW_SWIRL
-    #define RGBLIGHT_EFFECT_SNAKE
-    #define RGBLIGHT_EFFECT_KNIGHT
-    #define RGBLIGHT_EFFECT_CHRISTMAS
-    #define RGBLIGHT_EFFECT_STATIC_GRADIENT
-    #define RGBLIGHT_EFFECT_RGB_TEST
-    #define RGBLIGHT_EFFECT_ALTERNATING
-    #define RGBLIGHT_EFFECT_TWINKLE
-    #define RGBLIGHT_LIMIT_VAL 120
-    #define RGBLIGHT_HUE_STEP 10
-    #define RGBLIGHT_SAT_STEP 17
-    #define RGBLIGHT_VAL_STEP 17
-#endif
-
+// --- Split Keyboard Configurations ---
 // Sync Layer State, so both halves know which layer is active.
 #define SPLIT_LAYER_STATE_ENABLE
 // Sync Host LED State (Caps Lock, Num Lock, etc.).
@@ -58,8 +43,8 @@
 #define CAPS_WORD_INVERT_ON_SHIFT  // Shift does not break CapsWord
 #define CAPS_WORD_IDLE_TIMEOUT 0  // default: 5 seconds. 0 disables timeout and caps word will stay active until you press a non-breaking key.
 // Activation methods:
-// Activate by pressing Left Shift + Right Shift
+// [1] Activate by pressing Left Shift + Right Shift
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
-// Activate by double tapping Left Shift
+// [2] Activate by double tapping Left Shift
 #define DOUBLE_TAP_SHIFT_TURNS_ON_CAPS_WORD
 

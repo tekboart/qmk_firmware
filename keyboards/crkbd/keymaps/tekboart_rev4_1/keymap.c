@@ -116,39 +116,40 @@ void keyboard_post_init_user(void) {
 // Typing Layer
 #define TT_TYP TT(_TYPING)
 #define TG_TYP TG(_TYPING)
-// Function Layer
-#define LT_FN   LT(_FUNCTION, KC_ENT)
-#define MO_FN   MO(_FUNCTION)
-#define TT_FN   TT(_FUNCTION)
-#define TG_FN   TG(_FUNCTION)
 // Magic Layer
 #define MO_MGC   MO(_MAGIC)
 #define TT_MGC   TT(_MAGIC)
 #define TG_MGC   TG(_MAGIC)
-// Number Layer
-#define LT_NUM  LT(_NUMBER, KC_BSPC)
-#define TT_NUM  TT(_NUMBER)
-#define TG_NUM  TG(_NUMBER)
 // Gaming Layer
 #define LT_GAME  LT(_GAMING, KC_1)
 #define TT_GAME  TT(_GAMING)
 #define TG_GAME  TG(_GAMING)
-// Symbol Layer
-#define LT_SYM  LT(_SYMBOL, KC_TAB)
-#define TT_SYM  TT(_SYMBOL)
-#define TG_SYM  TG(_SYMBOL)
+// -- Thumb Layers --
 // Cursor Layer
 #define LT_CSR   LT(_CURSOR, KC_ESC)
 #define MO_CSR   MO(_CURSOR)
 #define TT_CSR   TT(_CURSOR)
 #define TG_CSR   TG(_CURSOR)
+// Number Layer
+#define LT_NUM  LT(_NUMBER, KC_TAB)
+#define TT_NUM  TT(_NUMBER)
+#define TG_NUM  TG(_NUMBER)
 // Navigation Layer
 #define LT_NAV   LT(_NAVIGATE, KC_SPC)
 #define MO_NAV   MO(_NAVIGATE)
 #define TT_NAV   TT(_NAVIGATE)
 #define TG_NAV   TG(_NAVIGATE)
+// Symbol Layer
+#define LT_SYM  LT(_SYMBOL, KC_ENT)
+#define TT_SYM  TT(_SYMBOL)
+#define TG_SYM  TG(_SYMBOL)
+// Function Layer
+#define LT_FN   LT(_FUNCTION, KC_ESC)
+#define MO_FN   MO(_FUNCTION)
+#define TT_FN   TT(_FUNCTION)
+#define TG_FN   TG(_FUNCTION)
 // Mouse Layer
-#define LT_MSE   LT(_MOUSE, KC_TAB)
+#define LT_MSE   LT(_MOUSE, KC_INS)
 #define MO_MSE   MO(_MOUSE)
 #define TT_MSE   TT(_MOUSE)
 #define TG_MSE   TG(_MOUSE)
@@ -706,6 +707,47 @@ bool caps_word_press_user(uint16_t keycode) {
     }
 }
 
+// ------------------------------------------------------
+// Cutomize Tapping Term behavior
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        // Guide: longer tapping terms (ms) means: a key must be held longer to be registered as a hold, and vice versa.
+        // If you want to avoid accedental hold, set a longer tapping term.
+        // If you want to avoid accedental tap, set a shorter tapping term.
+        // A caveat: Set high tapping terms leads to delays, as the keyboard waits as long as the tapping term to determine if a key is a tap or a hold.
+
+        // Layer hold keye, i.e., LT(layer, kc)
+        // As we use these layers for numbers, symbols, navigation, etc., it's better to make taps more deliberate by setting a smaller tapping term.
+        case LT_NAV:
+        case LT_SYM:
+        /** case LT_FN: */
+        /** case LT_NUM: */
+        /** case LT_CSR: */
+        /** case LT_MSE: */
+            return TAPPING_TERM - 50;
+
+        // Set a shorter tapping term for ENT to avoid accidental ENT trigger when typing fast.
+        // Standard keys
+        /** case KC_SPC: */
+        /**     return TAPPING_TERM - 50; */
+
+        // Mod-Tap keys, i.e., MT(mod, kc)
+        case HRW_A:
+        case HRW_S:
+        case HRW_D:
+        case HRW_F:
+        case HRW_G:
+        case HRW_H:
+        case HRW_J:
+        case HRW_K:
+        case HRW_L:
+        case HRW_SCLN:
+            return TAPPING_TERM;
+
+        default:
+            return TAPPING_TERM; // Uses the default value in config.h
+    }
+}
 
 // ------------------------------------------------------
 // Keymap Layout Configuration
@@ -727,14 +769,14 @@ bool caps_word_press_user(uint16_t keycode) {
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_BSLS,
         KC_ESC,   KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     XXXXXXX,  XXXXXXX,  KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
         KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
-                                      LT_CSR,   LT_NUM,   KC_TAB,                       KC_ESC,   LT_SYM,   LT_FN
+                                      KC_DEL,   KC_BSPC,  KC_SPC,                       KC_ENT,   KC_INS,   KC_PRT
     ),
 */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_QWERTY_3R] = LAYOUT_split_3x6_3_ex2(
     KC_LBRC,  KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_RBRC,
-    KC_ESC,   HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,    MO_MGC,   MO_MGC,   HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,
+    KC_BSPC,  HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,    MO_MGC,   MO_MGC,   HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,
     ST_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_BSLS,
                                   MO_CSR,   LT_NUM,   LT_NAV,                       LT_SYM,   LT_FN,    MO_MSE
 ),
@@ -769,8 +811,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_NAVIGATE] = LAYOUT_split_3x6_3_ex2(
     XXXXXXX,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     XXXXXXX,  XXXXXXX,  KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     XXXXXXX,
-    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  KC_MEH,   _______,  _______,  KC_HOME,  KC_LEFT,  KC_DOWN,  KC_UP,    KC_RGHT,  KC_END,
-    XXXXXXX,  SEL_ALL,  SEL_WRD,  SEL_LNE,  _______,  _______,                      SM_LBRC,  SM_LCBR,  SM_LPRN,  SM_RPRN,  SM_RCBR,  SM_RBRC,
+    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  _______,  _______,  KC_HOME,  KC_LEFT,  KC_DOWN,  KC_UP,    KC_RGHT,  KC_END,
+    XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                      SM_LBRC,  SM_LCBR,  SM_LPRN,  SM_RPRN,  SM_RCBR,  SM_RBRC,
                                   _______,  _______,  _______,                      SM_TILD,  SM_TICK,  _______
 ),
 
@@ -796,7 +838,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_FUNCTION] = LAYOUT_split_3x6_3_ex2(
-    XXXXXXX,  KC_VOLD,  KC_MUTE,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
+    KC_INS,   KC_VOLD,  KC_MUTE,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
     KC_CAPS,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  _______,  _______,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
     TG_TYP,   KC_MPRV,  KC_MPLY,  KC_MNXT,  UR_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
                                   XXXXXXX,  XXXXXXX,  XXXXXXX,                      XXXXXXX,  _______,  XXXXXXX
@@ -814,7 +856,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Define the encoder rotation map for each layer
 #ifdef ENCODER_MAP_ENABLE
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [_QWERTY_3R]    = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
+    [_QWERTY_3R]   = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
     [_TYPING]      = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
     /** [_BASE_STD]    = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), }, */
     [_FUNCTION]    = { ENCODER_CCW_CW(UG_VALD, UG_VALU), ENCODER_CCW_CW(KC_MPRV, KC_MNXT), ENCODER_CCW_CW(RM_VALD, RM_VALU), ENCODER_CCW_CW(KC_RGHT, KC_LEFT), },
@@ -900,7 +942,7 @@ bool rgb_matrix_indicators_user(void) {
     hsv_t hsv_green = (hsv_t){85, 255, val};
     rgb_t rgb_green = hsv_to_rgb(hsv_green);
 
-    hsv_t hsv_lime = (hsv_t){100, 255, val};
+    hsv_t hsv_lime = (hsv_t){85, 101, val};
     rgb_t rgb_lime = hsv_to_rgb(hsv_lime);
 
     hsv_t hsv_blue = (hsv_t){170, 255, val};
@@ -1068,6 +1110,9 @@ bool rgb_matrix_indicators_user(void) {
             /** Mac/Win Toggle (CG_TOGG) */
             rgb_matrix_set_color(29, rgb_blue.r, rgb_blue.g, rgb_blue.b);
 
+            /** Gaming Mode Toggle (TG_GAME) */
+            rgb_matrix_set_color(2, rgb_red.r, rgb_red.g, rgb_red.b);
+
             break;
         }
 
@@ -1086,18 +1131,24 @@ bool rgb_matrix_indicators_user(void) {
             };
             SET_RGB_COLOR(hrm_rgb_idx, rgb_hrm);
 
+            /** Symbol-Groups keys LED Colors  **/
+            static const uint8_t led_idx_sym_groups[] = {
+                24, 29, 32, 36, 37, 43
+            };
+            SET_RGB_COLOR(led_idx_sym_groups, rgb_cyan);
+
             // Set color for the number row
             static const uint8_t rgb_idx_num_row[] = {
                 17, 12, 11, 4, 3,     26, 27, 34, 35, 40
             };
-            SET_RGB_COLOR(rgb_idx_num_row, rgb_red);
+            SET_RGB_COLOR(rgb_idx_num_row, rgb_white_warm);
 
             // Set color for DEL
             rgb_matrix_set_color(19, rgb_red.r, rgb_red.g, rgb_red.b);
 
             // Set color for Getreuer's Select_WORD keys (SEL_ALL, SEL_WRD, SEL_LNE, FIND)
             static const uint8_t rgb_idx_gesture[] = {
-                15, 14, 9
+                1, 2
             };
             SET_RGB_COLOR(rgb_idx_gesture, rgb_lime);
             
@@ -1190,33 +1241,27 @@ bool rgb_matrix_indicators_user(void) {
             };
             SET_RGB_COLOR(led_idx_sym_quotes, rgb_pink);
 
-            /** Arrows keys LED Colors  **/
+            /** Symbol-Arrows keys LED Colors  **/
             static const uint8_t led_idx_sym_arrows[] = {
                     13,
                 15, 14, 9, 6
             };
             SET_RGB_COLOR(led_idx_sym_arrows, rgb_green);
 
-            /** Groups keys LED Colors  **/
-            static const uint8_t led_idx_sym_groups[] = {
-                24, 29, 32, 36, 37, 43
-            };
-            SET_RGB_COLOR(led_idx_sym_groups, rgb_cyan);
-
-            /** Flips keys LED Colors  **/
+            /** Symbol-Flips keys LED Colors  **/
             static const uint8_t led_idx_sym_flips[] = {
                 18
             };
             SET_RGB_COLOR(led_idx_sym_flips, rgb_purple);
 
-            /** VIM keys LED Colors  **/
+            /** Symbol-VIM keys LED Colors  **/
             static const uint8_t led_idx_sym_vim[] = {
                 19, 16, 5, 2,
                 0, 7
             };
             SET_RGB_COLOR(led_idx_sym_vim, rgb_orange);
 
-            /** Misc keys LED Colors  **/
+            /** Symbol-Misc keys LED Colors  **/
             static const uint8_t led_idx_sym_misc[] = {
             };
             SET_RGB_COLOR(led_idx_sym_misc, rgb_white);
@@ -1231,7 +1276,7 @@ bool rgb_matrix_indicators_user(void) {
             static const uint8_t rgb_idx_num_row[] = {
                 17, 12, 11, 4, 3,     26, 27, 34, 35, 40
             };
-            SET_RGB_COLOR(rgb_idx_num_row, rgb_red);
+            SET_RGB_COLOR(rgb_idx_num_row, rgb_white_warm);
 
             break;
         }
