@@ -35,7 +35,7 @@ enum layers {
     _NUMBER,   // Number/Numpad Layer (Split Layout)
     // Shared Layers (accessed from Base and Overlay Layers)
     // NOTE: _FUNCTION and MAGIC must be placed as the last layers.
-    // Refer to QMK's layer doc beginners guide: https://docs.qmk.fm/feature_layers#beginners 
+    // Refer to QMK's layer doc beginners guide: https://docs.qmk.fm/feature_layers#beginners
     _FUNCTION,    // Function Layer (Split Layout). Hint: It's a combination of Function, Magic and Lower Layers in MoErgo
     _MAGIC,       // Magic Layer (Split Layout). Hint: It mimics MoErgo's Magic Layer
 };
@@ -281,7 +281,7 @@ enum custom_keycodes {
     // Text Editing
     TX_HOME,
     TX_END,
-     
+
     // Mod-Tap Keys: MT_<HOLD><TAP>
     MT_TEMPLATE  // Tap: <Action_A>, Hold: <Action_B>
 
@@ -305,7 +305,7 @@ enum custom_keycodes {
 static bool app_switch_active = false;
 static uint16_t app_switch_timer = 0;
 // How long after the last WM_SWTCH press before the app switcher
-// is considered finished. 
+// is considered finished.
 // NOTE: If a window is selected before this timeout, the app switcher will close immediately.
 #define APP_SWITCH_TIMEOUT 800  // default: 100ms
 
@@ -696,14 +696,14 @@ bool caps_word_press_user(uint16_t keycode) {
         // symbols on the base layer
         case KC_MINS:
         case KC_UNDS:
-        case KC_COMM:
-        case KC_DOT:
-        case KC_SLSH:
-        case KC_BSLS:
-        case KC_SCLN:
-        case KC_QUOT:
-        case KC_LBRC:
-        case KC_RBRC:
+        // case KC_COMM:
+        // case KC_DOT:
+        // case KC_SLSH:
+        // case KC_BSLS:
+        // case KC_SCLN:
+        // case KC_QUOT:
+        // case KC_LBRC:
+        // case KC_RBRC:
         // Text Editing keys
         case KC_BSPC:
         case KC_DEL:
@@ -1099,7 +1099,7 @@ bool rgb_matrix_indicators_user(void) {
 
             /** RGB Toggle */
             rgb_matrix_set_color(18, rgb_purple.r, rgb_purple.g, rgb_purple.b);
-            
+
             /** RGB Brightness/Saturation/Hue */
             static const uint8_t rgb_idx_rgb_ctrl_increase[] = {
                 16, 13, 10
@@ -1171,7 +1171,7 @@ bool rgb_matrix_indicators_user(void) {
                 1, 2
             };
             SET_RGB_COLOR(rgb_idx_gesture, rgb_lime);
-            
+
             break;
         }
 
@@ -1259,7 +1259,7 @@ bool rgb_matrix_indicators_user(void) {
         // ---------------------------------------------------------------
         case _SYMBOL: {
             /** ALL Symbol Kyes LED Color */
-            
+
             // Use Sunsau's red (quotes), green (arrows), blue (groups), purple (flips), and yellow (Vim) colors for symbols
             /** Quotes keys LED Colors  **/
             static const uint8_t led_idx_sym_quotes[] = {
