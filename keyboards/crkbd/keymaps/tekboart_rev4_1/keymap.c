@@ -784,8 +784,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_QWERTY_3R] = LAYOUT_split_3x6_3_ex2(
     KC_LBRC,  KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_RBRC,
-    KC_BSPC,  HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,    MO_MGC,   MO_MGC,   HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,
-    ST_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_BSLS,
+    ST_LSFT,  HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,    MO_MGC,   MO_MGC,   HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,
+    KC_BSPC,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  DEL_NORM,
                                   MO_CSR,   LT_NUM,   LT_NAV,                       LT_SYM,   LT_FN,    MO_MSE
 ),
 
@@ -819,9 +819,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_NAVIGATE] = LAYOUT_split_3x6_3_ex2(
     XXXXXXX,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     XXXXXXX,  XXXXXXX,  KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     XXXXXXX,
-    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  _______,  _______,  KC_HOME,  KC_LEFT,  KC_DOWN,  KC_UP,    KC_RGHT,  KC_END,
-    XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                      SM_LBRC,  SM_LCBR,  SM_LPRN,  SM_RPRN,  SM_RCBR,  SM_RBRC,
-                                  _______,  _______,  _______,                      SM_TILD,  SM_TICK,  _______
+    XXXXXXX,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  _______,  _______,  KC_HOME,  KC_LEFT,  KC_DOWN,  KC_UP,    KC_RGHT,  KC_END,
+    DEL_NORM, UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                      SM_LBRC,  SM_LCBR,  SM_LPRN,  SM_RPRN,  SM_RCBR,  SM_RBRC,
+                                  _______,  _______,  _______,                      SM_BSLS,  SM_TICK,  _______
 ),
 
 [_CURSOR] = LAYOUT_split_3x6_3_ex2(
