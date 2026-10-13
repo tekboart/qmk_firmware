@@ -721,18 +721,18 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         // Guide: longer tapping terms (ms) means: a key must be held longer to be registered as a hold, and vice versa.
         // If you want to avoid accedental hold, set a longer tapping term.
         // If you want to avoid accedental tap, set a shorter tapping term.
-        // A caveat: Set high tapping terms leads to delays, as the keyboard waits as long as the tapping term to determine if a key is a tap or a hold.
+        // A caveat: Set high tapping terms leads to delays, as the keyboard has to wait longer to determine if a key is a tap or a hold.
 
         // Layer hold keye, i.e., LT(layer, kc)
         // As we use these layers for numbers, symbols, navigation, etc., it's better to make taps more deliberate by setting a smaller tapping term.
         // Moreover, Tap keys such as ENT, ESC or SPACE are dangerous to accidentally trigger when typing fast, hence a smaller tapping term.
         case LT_NAV:
         case LT_SYM:
-        case LT_FN:
+        /** case LT_FN: */
         /** case LT_NUM: */
         /** case LT_CSR: */
         /** case LT_MSE: */
-            return TAPPING_TERM - 50;
+            return TAPPING_TERM - 100;
 
         // Set a shorter tapping term for ENT to avoid accidental ENT trigger when typing fast.
         // Standard keys
