@@ -45,7 +45,7 @@
 
 // -- CAPS WORD CONFIGURATION ---
 // https://docs.qmk.fm/features/caps-word
-#define CAPS_WORD_INVERT_ON_SHIFT  // Shift does not break CapsWord
+// #define CAPS_WORD_INVERT_ON_SHIFT  // Shift does not break CapsWord
 #define CAPS_WORD_IDLE_TIMEOUT 0  // default: 5 seconds. 0 disables timeout and caps word will stay active until you press a non-breaking key.
 // Activation methods:
 // [1] Activate by pressing Left Shift + Right Shift
