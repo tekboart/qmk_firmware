@@ -722,6 +722,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         // If you want to avoid accedental hold, set a longer tapping term.
         // If you want to avoid accedental tap, set a shorter tapping term.
         // A caveat: Set high tapping terms leads to delays, as the keyboard has to wait longer to determine if a key is a tap or a hold.
+        // A caveat: the optimal tapping terms depends on switch type (linear or tactile) and/or actuation force (42g vs 35g).
 
         // ---- Layer hold keyes, i.e., LT(layer, kc)
         // As we use these layers for numbers, symbols, navigation, etc., it's better to make taps more deliberate by setting a smaller tapping term.
@@ -733,7 +734,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
         /** The thumb key with Enter as tap*/
         case LT_SYM:
-            return TAPPING_TERM - 100;
+            return TAPPING_TERM - 75;
 
         /** non-dangerous thumb keys */
         case LT_CSR:
@@ -815,7 +816,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_M,     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     XXXXXXX,  XXXXXXX,  _______,  _______,  KC_UP,    _______,  _______,  _______,
     KC_I,     KC_LSFT,  KC_A,     KC_S,     KC_D,     KC_F,     _______,  _______,  _______,  KC_LEFT,  KC_DOWN,  KC_RGHT,  _______,  _______,
     KC_G,     KC_LCTL,  KC_Z,     KC_X,     KC_C,     KC_V,                         _______,  _______,  _______,  _______,  _______,  _______,
-                                  XXXXXXX,  XXXXXXX,  KC_SPC,                       KC_ENT,   KC_ESC,  XXXXXXX
+                                  XXXXXXX,  XXXXXXX,  KC_SPC,                       KC_ENT,   KC_ESC,   XXXXXXX
 ),
 
 [_SYMBOL] = LAYOUT_split_3x6_3_ex2(
@@ -826,10 +827,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_NAVIGATE] = LAYOUT_split_3x6_3_ex2(
-    XXXXXXX,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     XXXXXXX,  XXXXXXX,  KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     SM_TICK,
+    XXXXXXX,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     XXXXXXX,  XXXXXXX,  KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     XXXXXXX,
     DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  _______,  _______,  KC_HOME,  KC_LEFT,  KC_DOWN,  KC_UP,    KC_RGHT,  KC_END,
     XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                      SM_LBRC,  SM_LCBR,  SM_LPRN,  SM_RPRN,  SM_RCBR,  SM_RBRC,
-                                  _______,  _______,  _______,                      SM_BSLS,  SM_TILD,  SM_TICK
+                                  _______,  _______,  _______,                      SM_BSLS,  SM_TICK,  _______
 ),
 
 [_CURSOR] = LAYOUT_split_3x6_3_ex2(
