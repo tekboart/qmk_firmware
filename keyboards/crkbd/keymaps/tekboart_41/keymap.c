@@ -723,18 +723,24 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         // If you want to avoid accedental tap, set a shorter tapping term.
         // A caveat: Set high tapping terms leads to delays, as the keyboard has to wait longer to determine if a key is a tap or a hold.
 
-        // Layer hold keye, i.e., LT(layer, kc)
+        // ---- Layer hold keyes, i.e., LT(layer, kc)
         // As we use these layers for numbers, symbols, navigation, etc., it's better to make taps more deliberate by setting a smaller tapping term.
         // Moreover, Tap keys such as ENT, ESC or SPACE are dangerous to accidentally trigger when typing fast, hence a smaller tapping term.
-        case LT_NAV:  // Choose the layer with "Space" as tap
-        /** case LT_FN: */
-        /** case LT_NUM: */
-        /** case LT_CSR: */
-        /** case LT_MSE: */
+
+        /** The thumb key with Space as tap*/
+        case LT_NAV:
             return TAPPING_TERM - 50;
 
-        case LT_SYM: // Choose the layer with "Enter" as tap
+        /** The thumb key with Enter as tap*/
+        case LT_SYM:
             return TAPPING_TERM - 100;
+
+        /** non-dangerous thumb keys */
+        case LT_CSR:
+        case LT_NUM:
+        case LT_FN:
+        case LT_MSE:
+            return TAPPING_TERM;
 
         // Set a shorter tapping term for ENT to avoid accidental ENT trigger when typing fast.
         // Standard keys
