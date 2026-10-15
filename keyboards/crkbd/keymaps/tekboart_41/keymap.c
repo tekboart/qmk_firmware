@@ -19,23 +19,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 #include "os_detection.h"  // Detect OS Mode automatically
 
+// ###############################################################
+// Layer Definition
+// ###############################################################
+
 enum layers {
-    // TODO: BASE layers (e.g., Split, Typing, Standard, Gaming) must always be the lowest numbered layers.
-    // I put a layer in betwwen so that MAC toggle selects Split Base layer and WIN toggle selects Standard Base layer.
+    // ---------------------------------------------------------------
     // Base Layers
-    _QWERTY_3R,  // Split Layer (Base)
-    /** _BASE_STD,  // Standard QWERTY Layer (Base): Disable all HRMs & Split Layout. Useful for keyboards with more than 3 rows. */
-    // Overlay Layers (on top of Base Layers)
+    // ---------------------------------------------------------------
+    // BASE layers (e.g., Split, Typing, Standard, Gaming) must always be the lowest numbered layers.
+    _QWERTY_3R,  // QWERTY 3 Row layer
+    /** _QWERTY_4R,  // QWERTY 4 Row layer */
+    /** _QWERTY_STD,  // Standard QWERTY Layer (Base): Uses only basic keycodes. */
+    // ---------------------------------------------------------------
+    // Overlay Layers - Modify some parts of the base layer
+    // ---------------------------------------------------------------
     _TYPING,    // Typing Layer (Base): Disable all HRMs.
     _GAMING,   // Gaming Layer
-    _SYMBOL,   // Symbols Layer (Split Layout)
-    _NAVIGATE, // Navigation Layer (Split Layout)
-    _CURSOR,   // Cursor Layer (Split Layout)
-    _MOUSE,    // Mouse Layer (Split Layout)
+    _SYMBOL,   // Symbols Layer
+    _NAVIGATE, // Navigation Layer
     _NUMBER,   // Number/Numpad Layer (Split Layout)
-    // Shared Layers (accessed from Base and Overlay Layers)
+    _CURSOR,   // Cursor Layer
+    _MOUSE,    // Mouse Layer
+    // ---------------------------------------------------------------
+    // Shared Layers - accessed from Base and Overlay Layers
+    // ---------------------------------------------------------------
     // NOTE: _FUNCTION and MAGIC must be placed as the last layers.
-    // Refer to QMK's layer doc beginners guide: https://docs.qmk.fm/feature_layers#beginners
+    // Refer to QMK's layer doc beginners guide:
+    // https://docs.qmk.fm/feature_layers#beginners
     _FUNCTION,    // Function Layer (Split Layout). Hint: It's a combination of Function, Magic and Lower Layers in MoErgo
     _MAGIC,       // Magic Layer (Split Layout). Hint: It mimics MoErgo's Magic Layer
 };
@@ -121,45 +132,44 @@ void keyboard_post_init_user(void) {
 /** #define TG_STD  TG(_BASE_STD) */
 /** #define DF_STD  DF(_BASE_STD) */
 // Typing Layer
-#define TT_TYP TT(_TYPING)
-#define TG_TYP TG(_TYPING)
-// Magic Layer
-#define MO_MGC   MO(_MAGIC)
-#define TT_MGC   TT(_MAGIC)
-#define TG_MGC   TG(_MAGIC)
+#define TT_TYP   TT(_TYPING)
+#define TG_TYP   TG(_TYPING)
 // Gaming Layer
-#define LT_GAME  LT(_GAMING, KC_1)
 #define TT_GAME  TT(_GAMING)
 #define TG_GAME  TG(_GAMING)
 // -- Thumb Layers --
-// Cursor Layer
-#define LT_CSR   LT(_CURSOR, KC_ESC)
-#define MO_CSR   MO(_CURSOR)
-#define TT_CSR   TT(_CURSOR)
-#define TG_CSR   TG(_CURSOR)
-// Number Layer
-#define LT_NUM  LT(_NUMBER, KC_TAB)
-#define TT_NUM  TT(_NUMBER)
-#define TG_NUM  TG(_NUMBER)
+// Symbol Layer
+#define LT_SYM  LT(_SYMBOL, KC_ENT)
+#define TT_SYM  TT(_SYMBOL)
+#define TG_SYM  TG(_SYMBOL)
 // Navigation Layer
 #define LT_NAV   LT(_NAVIGATE, KC_SPC)
 #define MO_NAV   MO(_NAVIGATE)
 #define TT_NAV   TT(_NAVIGATE)
 #define TG_NAV   TG(_NAVIGATE)
-// Symbol Layer
-#define LT_SYM  LT(_SYMBOL, KC_ENT)
-#define TT_SYM  TT(_SYMBOL)
-#define TG_SYM  TG(_SYMBOL)
-// Function Layer
-#define LT_FN   LT(_FUNCTION, KC_ESC)
-#define MO_FN   MO(_FUNCTION)
-#define TT_FN   TT(_FUNCTION)
-#define TG_FN   TG(_FUNCTION)
+// Number Layer
+#define LT_NUM   LT(_NUMBER, KC_TAB)
+#define TT_NUM   TT(_NUMBER)
+#define TG_NUM   TG(_NUMBER)
+// Cursor Layer
+#define LT_CSR   LT(_CURSOR, KC_ESC)
+#define MO_CSR   MO(_CURSOR)
+#define TT_CSR   TT(_CURSOR)
+#define TG_CSR   TG(_CURSOR)
 // Mouse Layer
 #define LT_MSE   LT(_MOUSE, KC_INS)
 #define MO_MSE   MO(_MOUSE)
 #define TT_MSE   TT(_MOUSE)
 #define TG_MSE   TG(_MOUSE)
+// Function Layer
+#define LT_FN   LT(_FUNCTION, KC_ESC)
+#define MO_FN   MO(_FUNCTION)
+#define TT_FN   TT(_FUNCTION)
+#define TG_FN   TG(_FUNCTION)
+// Magic Layer
+#define MO_MGC   MO(_MAGIC)
+#define TT_MGC   TT(_MAGIC)
+#define TG_MGC   TG(_MAGIC)
 
 // ------- Define Aliases: Mod-Tap Keys  -------
 #define MT_LSFT MT(MOD_LSFT,KC_LBRC)
@@ -822,7 +832,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_SYMBOL] = LAYOUT_split_3x6_3_ex2(
     SM_EXCL,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     XXXXXXX,  XXXXXXX,  KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     XXXXXXX,
     SM_HASH,  SM_CRET,  SM_EQL,   SM_UNDS,  SM_DLR,   SM_ASTR,  _______,  _______,  XXXXXXX,  KC_RSFT,  KC_RCTL,  KC_RALT,  KC_RGUI,  MC_TICK,
-    SM_AMPS,  SM_LT,    SM_PIPE,  SM_MINS,  SM_GT,    SM_PLUS,                      KC_TAB,   KC_SPC,   KC_ENT,   KC_BSPC,  KC_DEL,   _______,
+    SM_AMPS,  SM_LT,    SM_PIPE,  SM_MINS,  SM_GT,    SM_PLUS,                      KC_TAB,   KC_SPC,   KC_ENT,   KC_BSPC,  KC_DEL,   XXXXXXX,
                                   _______,  SM_PERC,  SM_ADS,                       _______,  _______,  _______
 ),
 
@@ -833,18 +843,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                   _______,  _______,  _______,                      SM_BSLS,  SM_TICK,  _______
 ),
 
-[_CURSOR] = LAYOUT_split_3x6_3_ex2(
-    KC_ESC,   WM_CLOSE, WM_TCLS,  AP_FEXP,  RENAME,   WM_NEW,   XXXXXXX,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,
-    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  FIND,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-    KC_ENT,   UNDO,     CUT,      COPY,     PASTE,    _______,                      _______,  _______,  _______,  _______,  _______,  _______,
-                                  _______,  KC_TAB,   KC_SPC,                       _______,  _______,  _______
-),
-
 [_NUMBER] = LAYOUT_split_3x6_3_ex2(
     XXXXXXX,  KC_DEL,   KC_BSPC,  KC_ENT,   KC_SPC,   KC_TAB,    XXXXXXX,  XXXXXXX,  KC_NUM,   KC_P7,   KC_P8,    KC_P9,    SM_COLN,  SM_PERC,
     KC_CALC,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,   _______,  _______,  SM_LPRN,  KC_P4,   KC_P5,    KC_P6,    KC_PMNS,  KC_PPLS,
     XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                       SM_RPRN,  KC_P1,   KC_P2,    KC_P3,    KC_PAST,  KC_PSLS,
                                   _______,  _______,  _______,                       KC_P0,    KC_PDOT, XXXXXXX
+),
+
+[_CURSOR] = LAYOUT_split_3x6_3_ex2(
+    KC_ESC,   WM_CLOSE, WM_TCLS,  AP_FEXP,  RENAME,   WM_NEW,   XXXXXXX,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,
+    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  FIND,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+    KC_ENT,   UNDO,     CUT,      COPY,     PASTE,    _______,                      _______,  _______,  _______,  _______,  _______,  _______,
+                                  _______,  KC_TAB,   KC_SPC,                       _______,  _______,  _______
 ),
 
 [_MOUSE] = LAYOUT_split_3x6_3_ex2(
@@ -855,9 +865,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_FUNCTION] = LAYOUT_split_3x6_3_ex2(
-    KC_INS,   KC_VOLD,  KC_MUTE,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
+    KC_INS,   KC_MUTE,  KC_VOLD,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
     KC_CAPS,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  _______,  _______,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
-    TG_TYP,   KC_MPRV,  KC_MPLY,  KC_MNXT,  UR_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
+    TG_TYP,   KC_MPLY,  KC_MPRV,  KC_MNXT,  UR_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
                                   _______,  _______,  _______,                      _______,  _______,  _______
 ),
 
