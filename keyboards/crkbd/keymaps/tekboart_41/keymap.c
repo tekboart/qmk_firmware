@@ -776,6 +776,22 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     }
 }
 
+/* Cutomizing the flow tap */
+uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record,
+                           uint16_t prev_keycode) {
+    switch (keycode) {
+    // by returning zero/0, we disable FLOW_TAP_TERM for some keys
+    // NOTE: Space LT is tricky, as I get unwanted space a lot instead of layer activation
+    case LT_NAV:
+        return 0;
+
+    default:
+        return is_flow_tap_key(keycode) && is_flow_tap_key(prev_keycode)
+                   ? FLOW_TAP_TERM
+                   : 0;
+    }
+}
+
 // ------------------------------------------------------
 // Keymap Layout Configuration
 // ------------------------------------------------------
