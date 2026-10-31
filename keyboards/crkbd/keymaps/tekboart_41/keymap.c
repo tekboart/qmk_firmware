@@ -769,7 +769,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         case HRW_K:
         case HRW_L:
         case HRW_SCLN:
-            return TAPPING_TERM;
+            return TAPPING_TERM + 20;
 
         default:
             return TAPPING_TERM; // Uses the default value in config.h
