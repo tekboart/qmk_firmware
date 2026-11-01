@@ -729,12 +729,12 @@ bool caps_word_press_user(uint16_t keycode) {
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         // Guide: longer tapping terms (ms) means: a key must be held longer to be registered as a hold, and vice versa.
-        // If you want to avoid accedental hold, set a longer tapping term.
-        // If you want to avoid accedental tap, set a shorter tapping term.
+        // If you want to avoid accidental hold, set a longer tapping term.
+        // If you want to avoid accidental tap, set a shorter tapping term.
         // A caveat: Set high tapping terms leads to delays, as the keyboard has to wait longer to determine if a key is a tap or a hold.
         // A caveat: the optimal tapping terms depends on switch type (linear or tactile) and/or actuation force (42g vs 35g).
 
-        // ---- Layer hold keyes, i.e., LT(layer, kc)
+        // ---- Layer hold keys, i.e., LT(layer, kc)
         // As we use these layers for numbers, symbols, navigation, etc., it's better to make taps more deliberate by setting a smaller tapping term.
         // Moreover, Tap keys such as ENT, ESC or SPACE are dangerous to accidentally trigger when typing fast, hence a smaller tapping term.
 
@@ -780,12 +780,16 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record,
                            uint16_t prev_keycode) {
     switch (keycode) {
-    // by returning zero/0, we disable FLOW_TAP_TERM for some keys
-    // NOTE: Space LT is tricky, as I get unwanted space a lot instead of layer activation
+    // by returning zero/0, we disable FLOW_TAP_TERM for some keys, hence they break a flow-tap.
+    // NOTE: Thumb LT layers (e.g., Space LT) are tricky, as I get a lot of unwanted taps, instead of layer activation, when typing fast.
     case LT_NAV:
+    case LT_NUM:
+    case LT_SYM:
+    case LT_FN:
         return 0;
 
     default:
+        // The default behavior is to use FLOW_TAP_TERM if both the current and previous keycodes are flow-tap keys.
         return is_flow_tap_key(keycode) && is_flow_tap_key(prev_keycode)
                    ? FLOW_TAP_TERM
                    : 0;
