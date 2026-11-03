@@ -1,23 +1,39 @@
 #pragma once
 
-// Define the #layers in your keymap.c file.
-// #define DYNAMIC_KEYMAP_LAYER_COUNT 11
+// ########################################################################
+// Tap-Hold Configs
+// ########################################################################
 
-// --- Home Row Mods (HRMs) Configurations --- 
-// ME + Internet
-// Tapping Terms means: the minimum time (in milliseconds) that a key should e held down to be considered a hold, not a tap.
-#define TAPPING_TERM   200  // Default: 200 (ms)
-#define QUICK_TAP_TERM  80  // Default: = TAPPING_TERM
-#define FLOW_TAP_TERM  150
-#define CHORDAL_HOLD
-/** #define PERMISSIVE_HOLD  // Bad for Legato typing style */
-/** #define SPECULATIVE_HOLD  // Bad for accidental modifier activation */
-#define TAPPING_TERM_PER_KEY // Allow different tapping terms for different keys, using get_tapping_term in keymap.c
+// ------------------------------------------------------------------------
+// Set tapping TERMs
+// ------------------------------------------------------------------------
+// Sunsaku's suggested TAPPING_TERM, based on difficulty:
+// LEVEL 0 => sunaku (150ms)
+// LEVEL 1 => novice (500ms)
+// LEVEL 2 => slower (400ms)
+// LEVEL 3 => normal (300ms)
+// LEVEL 4 => faster (200ms)
+// LEVEL 5 => expert (100ms)
+
+#define TAPPING_TERM   150                   // The duration, after which, a key is considered held. Default: 200 (ms)
+#define QUICK_TAP_TERM (TAPPING_TERM + 150)  // Time after a tap, during which holding the same key results in auto-repeat. Default: = TAPPING_TERM
+#define FLOW_TAP_TERM  (TAPPING_TERM - 50)   // Disables holds when typing quickly.
+/** #define PERMISSIVE_HOLD                  // (~ZMK's balanced) Triggers hold if you tap another key while holding it. Bad for Legato typing style, but CHORDAL_HOLD can reduce its impact. */
+/** #define HOLD_ON_OTHER_KEY                // (~ZMK's hold-preferred) Compared to the "permissive hold" mode, this mode selects the hold action in more cases. */
+/** #define SPECULATIVE_HOLD                 // Bad for accidental modifier activation */
+#define CHORDAL_HOLD                         // Constrains holds to opposite-hand combinations. It's intended to be used with either PERMISSIVE_HOLD or HOLD_ON_OTHER_KEY.
+#define IGNORE_MOD_TAP_INTERRUPT             // For rolling on mod-tap keys. It's now the default behavior, hence uncommenting this.
+#define TAPPING_TERM_PER_KEY                 // Allow different tapping terms for different keys, using get_tapping_term in keymap.c
+#define PERMISSIVE_HOLD_PER_KEY              // Allow different permissive hold behavior for different keys, using get_permissive_hold in keymap.c
+#define HOLD_ON_OTHER_KEY_PRESS_PER_KEY      // Allow different hold-on-other-key behavior for different keys, using get_hold_on_other_key_press in keymap.c
+
+// Custom Tapping Terms
+#define HRM_TAPPING_TERM  (TAPPING_TERM)  // Home Row Mods (HRM) keys tapping TERM
 
 // --- Bilateral Combinations Configurations ---
 // https://sunaku.github.io/home-row-mods.html
 // https://github.com/manna-harbour/qmk_firmware/pull/56
-// IGNORE_MOD_TAP_INTERRUPT is now the default behavior, hence uncommenting this.
+// IGNORE_MOD_TAP_INTERRUPT is now the default behavior, hence commenting this.
 // #define IGNORE_MOD_TAP_INTERRUPT [> for rolling on mod-tap keys <]
 
 /* Miryoku */

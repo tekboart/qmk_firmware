@@ -184,16 +184,16 @@ void keyboard_post_init_user(void) {
 #define ST_RSFT OSM(MOD_RSFT)
 
 // ------- Define Aliases: Home Row Mods (HRMs) -------
-#define HRW_A    MT(MOD_LGUI, KC_A)
-#define HRW_S    MT(MOD_LALT, KC_S)
-#define HRW_D    MT(MOD_LCTL, KC_D)
-#define HRW_F    MT(MOD_LSFT, KC_F)
-#define HRW_G    MEH_T(KC_G)
-#define HRW_H    MEH_T(KC_H)
-#define HRW_J    MT(MOD_RSFT, KC_J)
-#define HRW_K    MT(MOD_RCTL, KC_K)
-#define HRW_L    MT(MOD_RALT, KC_L)
-#define HRW_SCLN MT(MOD_RGUI, KC_SCLN)
+#define HRW_LP    MT(MOD_LGUI, KC_A)
+#define HRW_LR    MT(MOD_LALT, KC_S)
+#define HRW_LM    MT(MOD_LCTL, KC_D)
+#define HRW_LI    MT(MOD_LSFT, KC_F)
+#define HRW_LME   MEH_T(KC_G)
+#define HRW_RME   MEH_T(KC_H)
+#define HRW_RI    MT(MOD_RSFT, KC_J)
+#define HRW_RM    MT(MOD_RCTL, KC_K)
+#define HRW_RR    MT(MOD_RALT, KC_L)
+#define HRW_RP    MT(MOD_RGUI, KC_SCLN)
 
 // ------- Define Aliases: Symbols -------
 #define SM_EXCL   S(KC_1)     // !
@@ -657,6 +657,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
+// ########################################################################
+// Matrix Scan Usert loging
+// ########################################################################
 /** This function gets called at every matrix scan, which is basically as often as the MCU can handle. */
 /** Be careful what you put here, as it will get run a lot--even when user doesn't type. */
 void matrix_scan_user(void) {
@@ -689,9 +692,9 @@ void matrix_scan_user(void) {
     }
 }
 
-// ------------------------------------------------------
+// ########################################################################
 // Customize CAPS WORD behavior
-// ------------------------------------------------------
+// ########################################################################
 bool caps_word_press_user(uint16_t keycode) {
     switch (keycode) {
         // Keycodes that continue Caps Word, with shift applied.
@@ -724,8 +727,9 @@ bool caps_word_press_user(uint16_t keycode) {
     }
 }
 
-// ------------------------------------------------------
+// ######################################################
 // Cutomize Tapping Term behavior
+// ######################################################
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         // Guide: longer tapping terms (ms) means: a key must be held longer to be registered as a hold, and vice versa.
@@ -734,71 +738,193 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         // A caveat: Set high tapping terms leads to delays, as the keyboard has to wait longer to determine if a key is a tap or a hold.
         // A caveat: the optimal tapping terms depends on switch type (linear or tactile) and/or actuation force (42g vs 35g).
 
-        // ---- Layer hold keys, i.e., LT(layer, kc)
+        // ------------------------------------------------------
+        // Thumb keys, i.e., LT, MO, etc.
+        // ------------------------------------------------------
         // As we use these layers for numbers, symbols, navigation, etc., it's better to make taps more deliberate by setting a smaller tapping term.
         // Moreover, Tap keys such as ENT, ESC or SPACE are dangerous to accidentally trigger when typing fast, hence a smaller tapping term.
 
-        /** The thumb key with Space as tap*/
-        case LT_NAV:
-            return TAPPING_TERM - 50;
-
-        /** The thumb key with Enter as tap*/
-        case LT_SYM:
-            return TAPPING_TERM - 75;
-
-        /** non-dangerous thumb keys */
-        case LT_CSR:
+        /** General thumb keys */
+        /** These keys are mostly used for tapping, as their layer is not used while typing fast, hence a longer tapping term (i.e., tap preferred) */
         case LT_NUM:
         case LT_FN:
-        case LT_MSE:
-            return TAPPING_TERM;
+            return (TAPPING_TERM + 50);
 
-        // Set a shorter tapping term for ENT to avoid accidental ENT trigger when typing fast.
+        /** no tap Thumb Keys */
+        /** These keys have no tap key assigned, hence they need a much shorter tapping term (i.e., held preferred). */
+        case LT_CSR:
+        case LT_MSE:
+            return TAPPING_TERM - 100;
+
+        /** The thumb key with Space as tap*/
+        // Set a shorter tapping term for SPC to avoid accidental SPC taps when typing fast.
+        case LT_NAV:
+            return TAPPING_TERM - 10;
+
+        /** The thumb key with Enter as tap*/
+        // Set a shorter tapping term for ENT to avoid accidental ENT taps when typing fast.
+        case LT_SYM:
+            return TAPPING_TERM - 25;
+
+        // ------------------------------------------------------
+        // Home Row Mod (HRM) keys, i.e., MT
+        // ------------------------------------------------------
+        // Index Finger HRMs
+        case HRW_LI:
+        case HRW_RI:
+            return TAPPING_TERM + 30;
+        // MEH HRMs (using Index Finger but slower to reach)
+        case HRW_LME:
+        case HRW_RME:
+            return TAPPING_TERM + 50;
+        // Middle Finger HRMs
+        case HRW_LM:
+        case HRW_RM:
+            return TAPPING_TERM + 60;
+        // Ring Finger HRMs
+        case HRW_LR:
+        case HRW_RR:
+            return TAPPING_TERM + 90;
+        // Pinky Finger HRMs
+        case HRW_LP:
+        case HRW_RP:
+            return TAPPING_TERM + 120;
+
+        // ------------------------------------------------------
         // Standard keys
+        // ------------------------------------------------------
+        // NOTE: It's recommended to use tap-mod/tap-layer keys instead of the standard keys.
         /** case KC_SPC: */
         /**     return TAPPING_TERM - 50; */
 
-        // Mod-Tap keys, i.e., MT(mod, kc)
-        case HRW_A:
-        case HRW_S:
-        case HRW_D:
-        case HRW_F:
-        case HRW_G:
-        case HRW_H:
-        case HRW_J:
-        case HRW_K:
-        case HRW_L:
-        case HRW_SCLN:
-            return TAPPING_TERM + 20;
-
+        // ------------------------------------------------------
+        // The default behavior when the keycode is not covered by the above cases.
+        // ------------------------------------------------------
         default:
             return TAPPING_TERM; // Uses the default value in config.h
     }
 }
 
-/* Cutomizing the flow tap */
+// ######################################################
+// Cutomizing the flow tap
+// ######################################################
+
+// Define which keys are considered flow-tap keys.
+bool is_flow_tap_key(uint16_t keycode) {
+
+    // Disable Flow Tap on hotkeys (i.e., when Control or Alt is pressed), to avoid accidental taps when typing fast.
+    if ((get_mods() & (MOD_MASK_CG | MOD_BIT_LALT)) != 0) {
+        return false;
+    }
+
+    // switch (get_tap_keycode(keycode)) {
+    switch (keycode) {
+
+        // Enable Flow Tap for Home Row Mod (HRM) keys, i.e., MT
+        case HRW_LP :
+        case HRW_LR :
+        case HRW_LM :
+        case HRW_LI :
+        case HRW_LME:
+        case HRW_RME:
+        case HRW_RI :
+        case HRW_RM :
+        case HRW_RR :
+        case HRW_RP :
+            return true;
+
+        default:
+            // The Flow Tap is disabled by default for all other keys.
+            return false;
+    }
+
+}
+
+// Set diff FLOW_TAP_TERM for different keys, to avoid accidental taps when typing fast.
 uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record,
                            uint16_t prev_keycode) {
     switch (keycode) {
-    // by returning zero/0, we disable FLOW_TAP_TERM for some keys, hence they break a flow-tap.
-    // NOTE: Thumb LT layers (e.g., Space LT) are tricky, as I get a lot of unwanted taps, instead of layer activation, when typing fast.
-    case LT_NAV:
-    case LT_NUM:
-    case LT_SYM:
-    case LT_FN:
-        return 0;
+    // by returning zero/0, we disable FLOW_TAP_TERM for the specified keys, However it's recommended to use `is_flow_tap_key()` to disable Flow Tap.
+    // NOTE: Be sure not to include the keys that were not enabled in `is_flow_tap_key()` to avoid conflicts.
 
-    default:
-        // The default behavior is to use FLOW_TAP_TERM if both the current and previous keycodes are flow-tap keys.
-        return is_flow_tap_key(keycode) && is_flow_tap_key(prev_keycode)
-                   ? FLOW_TAP_TERM
-                   : 0;
+        // ------------------------------------------------------
+        // Home Row Mod (HRM) keys, i.e., MT
+        // ------------------------------------------------------
+        // Index Finger HRMs
+        case HRW_LI:
+        case HRW_RI:
+            return FLOW_TAP_TERM - 30;
+        // MEH HRMs (using Index Finger but slower to reach)
+        case HRW_LME:
+        case HRW_RME:
+            return FLOW_TAP_TERM - 20;
+        // Middle Finger HRMs
+        case HRW_LM:
+        case HRW_RM:
+            return FLOW_TAP_TERM - 20;
+        // Ring Finger HRMs
+        case HRW_LR:
+        case HRW_RR:
+            return FLOW_TAP_TERM - 10;
+        // Pinky Finger HRMs
+        case HRW_LP:
+        case HRW_RP:
+            return FLOW_TAP_TERM;
+
+        default:
+            // The default behavior is to use FLOW_TAP_TERM iff both the current and previous keycodes are flow-tap keys.
+            return is_flow_tap_key(keycode) && is_flow_tap_key(prev_keycode)
+                    ? FLOW_TAP_TERM
+                    : 0;
     }
 }
 
-// ------------------------------------------------------
+// ######################################################
+// Cutomizing PERMISSIVE_HOLD behavior
+// ######################################################
+bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        // return true: the HOLD_ON_OTHER_KEY_PRESS is activated, and vice versa.
+        // NOTE: Don't enable both HOLD_ON_OTHER_KEY_PRESS and PERMISSIVE_HOLD for the same key, as it will cause conflicts.
+
+        case LT_NUM:
+        case LT_CSR:
+        case LT_NAV:
+        case LT_SYM:
+        case LT_FN:
+        case LT_MSE:
+            // Immediately select the hold action when another key is tapped.
+            return true;
+
+        default:
+            // Do not select the hold action when another key is tapped.
+            return false;
+    }
+}
+
+// ######################################################
+// Cutomizing HOLD_ON_OTHER_KEY_PRESS behavior
+// ######################################################
+// It's similar to ZMK's "hold-preferred" flavor.
+bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        // return true: the HOLD_ON_OTHER_KEY_PRESS is activated, and vice versa.
+        // NOTE: Don't enable both HOLD_ON_OTHER_KEY_PRESS and PERMISSIVE_HOLD for the same key, as it will cause conflicts.
+
+
+        // Immediately select the hold action when another key is pressed.
+        case LT_
+            return true;
+
+        // Do not select the hold action when another key is pressed.
+        default:
+            return false;
+    }
+}
+
+// ######################################################
 // Keymap Layout Configuration
-// ------------------------------------------------------
+// ######################################################
 // clang-format off
 
 // Clear keymap template:
@@ -823,7 +949,7 @@ uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record,
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_QWERTY_3R] = LAYOUT_split_3x6_3_ex2(
     KC_LBRC,  KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     XXXXXXX,  XXXXXXX,  KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_RBRC,
-    KC_BSPC,  HRW_A,    HRW_S,    HRW_D,    HRW_F,    HRW_G,    MO_MGC,   MO_MGC,   HRW_H,    HRW_J,    HRW_K,    HRW_L,    HRW_SCLN, KC_QUOT,
+    KC_BSPC,  HRW_LP,    HRW_LR,    HRW_LM,    HRW_LI,    HRW_LME,    MO_MGC,   MO_MGC,   HRW_RME,    HRW_RI,    HRW_RM,    HRW_RR,    HRW_RP, KC_QUOT,
     ST_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,                         KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  ST_RSFT,
                                   MO_CSR,   LT_NUM,   LT_NAV,                       LT_SYM,   LT_FN,    MO_MSE
 ),
