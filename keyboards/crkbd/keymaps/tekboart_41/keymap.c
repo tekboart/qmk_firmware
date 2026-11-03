@@ -873,6 +873,7 @@ uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record,
 
         default:
             // The default behavior is to use FLOW_TAP_TERM iff both the current and previous keycodes are flow-tap keys.
+            // FIXME: Not sure whther `return 0`, without any conditions c would be a better choice.
             return is_flow_tap_key(keycode) && is_flow_tap_key(prev_keycode)
                     ? FLOW_TAP_TERM
                     : 0;
