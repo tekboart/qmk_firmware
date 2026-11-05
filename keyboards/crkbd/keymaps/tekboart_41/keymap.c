@@ -744,25 +744,28 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         // As we use these layers for numbers, symbols, navigation, etc., it's better to make taps more deliberate by setting a smaller tapping term.
         // Moreover, Tap keys such as ENT, ESC or SPACE are dangerous to accidentally trigger when typing fast, hence a smaller tapping term.
 
-        /** General thumb keys */
-        /** These keys are mostly used for tapping, as their layer is not used while typing fast, hence a longer tapping term (i.e., tap preferred) */
-        case LT_NUM:
-        case LT_FN:
-            return (TAPPING_TERM + 50);
-
         /** no tap Thumb Keys */
         /** These keys have no tap key assigned, hence they need a much shorter tapping term (i.e., held preferred). */
         case LT_CSR:
         case LT_MSE:
             return TAPPING_TERM - 100;
 
+        /** General thumb keys */
+        /** These keys are mostly used for tapping, as their layer is not used while typing fast, hence a longer tapping term (i.e., tap preferred) */
+        // FIXME: I think by adding thumb keys to PERSMIISIVE_HOLD or HOLD_ON_OTHER_KEY_PRESS, we would not need to lowe tapping term to prefer hold over tap.
+        case LT_NUM:
+        case LT_FN:
+            return (TAPPING_TERM + 50);
+
         /** The thumb key with Space as tap*/
         // Set a shorter tapping term for SPC to avoid accidental SPC taps when typing fast.
+        // FIXME: I think by adding thumb keys to PERSMIISIVE_HOLD or HOLD_ON_OTHER_KEY_PRESS, we would not need to lowe tapping term to prefer hold over tap.
         case LT_NAV:
             return TAPPING_TERM - 10;
 
         /** The thumb key with Enter as tap*/
         // Set a shorter tapping term for ENT to avoid accidental ENT taps when typing fast.
+        // FIXME: I think by adding thumb keys to PERSMIISIVE_HOLD or HOLD_ON_OTHER_KEY_PRESS, we would not need to lowe tapping term to prefer hold over tap.
         case LT_SYM:
             return TAPPING_TERM - 25;
 
@@ -853,27 +856,28 @@ uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record,
         // Index Finger HRMs
         case HRW_LI:
         case HRW_RI:
-            return FLOW_TAP_TERM - 30;
+            return HRM_TAPPING_TERM;
         // MEH HRMs (using Index Finger but slower to reach)
         case HRW_LME:
         case HRW_RME:
-            return FLOW_TAP_TERM - 20;
+            return HRM_TAPPING_TERM + 20;
         // Middle Finger HRMs
         case HRW_LM:
         case HRW_RM:
-            return FLOW_TAP_TERM - 20;
+            return HRM_TAPPING_TERM + 30;
         // Ring Finger HRMs
         case HRW_LR:
         case HRW_RR:
-            return FLOW_TAP_TERM - 10;
+            return HRM_TAPPING_TERM + 40;
         // Pinky Finger HRMs
         case HRW_LP:
         case HRW_RP:
-            return FLOW_TAP_TERM;
+            return HRM_TAPPING_TERM + 50;
 
         default:
             // The default behavior is to use FLOW_TAP_TERM iff both the current and previous keycodes are flow-tap keys.
-            // FIXME: Not sure whther `return 0`, without any conditions c would be a better choice.
+            // FIXME: Not sure whther `return 0`, without any conditions would be a better choice.
+            // As the prev_keycode might not be a HRM (hence not a flow-tap key), but we care about the tap-hold behavior of the current keycode might be a HRM (hence a flow-tap key).
             return is_flow_tap_key(keycode) && is_flow_tap_key(prev_keycode)
                     ? FLOW_TAP_TERM
                     : 0;
@@ -885,7 +889,7 @@ uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t *record,
 // ######################################################
 bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        // return true: the HOLD_ON_OTHER_KEY_PRESS is activated, and vice versa.
+        // return true: the PERMISSIVE_HOLD is activated, and vice versa.
         // NOTE: Don't enable both HOLD_ON_OTHER_KEY_PRESS and PERMISSIVE_HOLD for the same key, as it will cause conflicts.
 
         case LT_NUM:
@@ -912,10 +916,14 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
         // return true: the HOLD_ON_OTHER_KEY_PRESS is activated, and vice versa.
         // NOTE: Don't enable both HOLD_ON_OTHER_KEY_PRESS and PERMISSIVE_HOLD for the same key, as it will cause conflicts.
 
-
         // Immediately select the hold action when another key is pressed.
-        case LT_
-            return true;
+        // case LT_NUM:
+        // case LT_CSR:
+        // case LT_NAV:
+        // case LT_SYM:
+        // case LT_FN:
+        // case LT_MSE:
+        //     return true;
 
         // Do not select the hold action when another key is pressed.
         default:
