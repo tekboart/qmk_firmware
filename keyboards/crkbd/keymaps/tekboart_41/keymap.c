@@ -746,8 +746,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
         /** no tap Thumb Keys */
         /** These keys have no tap key assigned, hence they need a much shorter tapping term (i.e., held preferred). */
-        case LT_CSR:
-        case LT_MSE:
+        case MO_CSR:
+        case MO_MSE:
             return TAPPING_TERM - 100;
 
         /** General thumb keys */
@@ -779,7 +779,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         // MEH HRMs (using Index Finger but slower to reach)
         case HRW_LME:
         case HRW_RME:
-            return TAPPING_TERM + 50;
+            return TAPPING_TERM + 45;
         // Middle Finger HRMs
         case HRW_LM:
         case HRW_RM:
