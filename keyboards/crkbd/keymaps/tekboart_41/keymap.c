@@ -230,9 +230,9 @@ void keyboard_post_init_user(void) {
 #define SM_UNDS   S(KC_MINS)  // _
 
 // ---------------------------------------------------------------
-// Define Aliases: OS specific actions
+// Define Aliases: Editing
 // ---------------------------------------------------------------
-
+// TODO: add these next to AP_FFOX, and add os specific behavior for mac
 #define CUT      C(KC_X)
 #define COPY     C(KC_C)
 #define PASTE    C(KC_V)
@@ -253,7 +253,6 @@ void keyboard_post_init_user(void) {
 // ---------------------------------------------------------------
 // Define Aliases: App Shortcuts
 // ---------------------------------------------------------------
-#define SCUT_FFOX  MEH(KC_1)  // Open Firefox Browser
 #define URL_AI_CHATBOT "https://chat.openai.com/chat"
 
 // ---------------------------------------------------------------
@@ -555,9 +554,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case AP_FFOX:
             if (record->event.pressed) {
                 if (is_windows_mode()) {
-                    tap_code16(SCUT_FFOX);
+                    tap_code16(MEH(KC_1));
                 } else {
-                    tap_code16(SCUT_FFOX);
+                    tap_code16(MEH(KC_1));
                 }
             }
             return false;
