@@ -233,13 +233,12 @@ void keyboard_post_init_user(void) {
 // Define Aliases: Editing
 // ---------------------------------------------------------------
 // TODO: add these next to AP_FFOX, and add os specific behavior for mac
-#define CUT      C(KC_X)
-#define COPY     C(KC_C)
-#define PASTE    C(KC_V)
-#define UNDO     C(KC_Z)
-#define REDO     S(C(KC_Z))
-#define FIND     C(KC_F)
-#define SEL_ALL  C(KC_A)
+#define _CUT      C(KC_X)
+#define _COPY     C(KC_C)
+#define _PASTE    C(KC_V)
+#define _UNDO     C(KC_Z)
+#define _FIND     C(KC_F)
+// #define SEL_ALL  C(KC_A)
 
 // ---------------------------------------------------------------
 // Define Aliases: Community Modules
@@ -249,10 +248,13 @@ void keyboard_post_init_user(void) {
 #define SEL_WRB SELECT_WORD_BACK
 #define SEL_LNE SELECT_LINE
 #define SEL_LNU SELECT_LINE_UP
+#define SEL_ALL SELECT_ALL
 
 // ---------------------------------------------------------------
-// Define Aliases: App Shortcuts
+// Define Aliases: For Opening AI chatbot
 // ---------------------------------------------------------------
+// Shortcut for firefox is needed for thr MC_GPT keycode
+#define SCUT_FFOX  MEH(KC_1)  // Open Firefox Browser
 #define URL_AI_CHATBOT "https://chat.openai.com/chat"
 
 // ---------------------------------------------------------------
@@ -261,6 +263,7 @@ void keyboard_post_init_user(void) {
 enum custom_keycodes {
     // Macros
     MC_TICK = SAFE_RANGE,
+    MC_GPT,   // Open ChatGPT in a browser (e.g., Firefox)
 
     // OS-specific window/application management
     WM_SWTCH,
@@ -273,7 +276,7 @@ enum custom_keycodes {
     WM_SPOT,
 
     // File Management
-    RENAME,
+    _RENAME,
     DEL_NORM,
     DEL_PERM,
 
@@ -283,13 +286,12 @@ enum custom_keycodes {
     AP_FFOX,  // Open Firefox Browser
     AP_CHRM,  // Open Google Chrome Browser
     AP_SSHT,  // Open Screenshot Tool
-
-    // URLs/Websites
-    UR_GPT,   // Open ChatGPT in a browser (e.g., Firefox)
+    AP_EMOJ,  // Open Emoji Picker
 
     // Text Editing
-    TX_HOME,
-    TX_END,
+    _HOME,
+    _END,
+    _REDO,
 
     // Mod-Tap Keys: MT_<HOLD><TAP>
     MT_TEMPLATE  // Tap: <Action_A>, Hold: <Action_B>
@@ -452,7 +454,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // -------------------------------------------------------
         // Rename File/Folder (Windows: F2, macOS: Enter)
         // -------------------------------------------------------
-        case RENAME:
+        case _RENAME:
             if (record->event.pressed) {
                 if (is_windows_mode()) {
                     tap_code16(KC_F2);
@@ -494,7 +496,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // -------------------------------------------------------
         // HOME (Windows: Home, macOS: Command + Left Arrow)
         // -------------------------------------------------------
-        case TX_HOME:
+        case _HOME:
             if (record->event.pressed) {
                 if (is_windows_mode()) {
                     tap_code16(KC_HOME);
@@ -507,12 +509,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // -------------------------------------------------------
         // END (Windows: End, macOS: Command + Right Arrow)
         // -------------------------------------------------------
-        case TX_END:
+        case _END:
             if (record->event.pressed) {
                 if (is_windows_mode()) {
                     tap_code16(KC_END);
                 } else {
                     tap_code16(G(KC_RGHT));
+                }
+            }
+            return false;
+
+        // -------------------------------------------------------
+        // REDO (Windows: Ctrl + Shift + Z (or, Ctrl + Y), macOS: Command + Shift + Z)
+        // -------------------------------------------------------
+        case _REDO:
+            if (record->event.pressed) {
+                if (is_windows_mode()) {
+                    tap_code16(S(C(KC_Z)));
+                    // tap_code16(C(KC_Y));
+                } else {
+                    tap_code16(S(G(KC_Z)));
                 }
             }
             return false;
@@ -529,7 +545,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if (is_windows_mode()) {
                     tap_code16(G(KC_E));
                 } else {
-                    tap_code16(MEH(KC_E));
+                    tap_code16(G(S(KC_G)));
                 }
             }
             return false;
@@ -582,7 +598,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if (is_windows_mode()) {
                     tap_code16(S(G(KC_S)));
                 } else {
-                    tap_code16(KC_1);
+                    tap_code16(S(G(KC_4)));
+                }
+            }
+            return false;
+
+        // -------------------------------------------------------
+        // Screenshot Tool
+        // -------------------------------------------------------
+        case AP_EMOJ:
+            if (record->event.pressed) {
+                if (is_windows_mode()) {
+                    tap_code16(G(KC_DOT));
+                } else {
+                    tap_code16(A(C(KC_SPC)));
                 }
             }
             return false;
@@ -593,10 +622,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // ------------------------------------------------------
         // Open AI chatbot in a browser (e.g., Firefox)
         // ------------------------------------------------------
-        case UR_GPT:
+        case MC_GPT:
             if (record->event.pressed) {
                 // Launch Firefox using existing Firefox shortcut.
-                tap_code16(SCUT_FFOX);
+                tap_code16(AP_FFOX);
+                // tap_code16(SCUT_FFOX);
 
                 // Allow Firefox to start/focus.
                 wait_ms(1200);
@@ -705,17 +735,10 @@ bool caps_word_press_user(uint16_t keycode) {
         // Keycodes that continue Caps Word, without shifting.
         // Numbers
         case KC_1 ... KC_0:
+        case KC_P1 ... KC_P0:
         // symbols on the base layer
         case KC_MINS:
         case KC_UNDS:
-        // case KC_COMM:
-        // case KC_DOT:
-        // case KC_SLSH:
-        // case KC_BSLS:
-        // case KC_SCLN:
-        // case KC_QUOT:
-        // case KC_LBRC:
-        // case KC_RBRC:
         // Text Editing keys
         case KC_BSPC:
         case KC_DEL:
@@ -992,36 +1015,36 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_NAVIGATE] = LAYOUT_split_3x6_3_ex2(
     XXXXXXX,  KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     XXXXXXX,  XXXXXXX,  KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     XXXXXXX,
-    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  _______,  _______,  KC_HOME,  KC_LEFT,  KC_DOWN,  KC_UP,    KC_RGHT,  KC_END,
-    XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                      SM_LBRC,  SM_LCBR,  SM_LPRN,  SM_RPRN,  SM_RCBR,  SM_RBRC,
+    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,  _______,  _______,  _HOME,    KC_LEFT,  KC_DOWN,  KC_UP,    KC_RGHT,  _END,
+    XXXXXXX,  _UNDO,    _CUT,     _COPY,   _PASTE,    SEL_LNE,                      SM_LBRC,  SM_LCBR,  SM_LPRN,  SM_RPRN,  SM_RCBR,  SM_RBRC,
                                   _______,  _______,  _______,                      SM_BSLS,  SM_TICK,  _______
 ),
 
 [_NUMBER] = LAYOUT_split_3x6_3_ex2(
     XXXXXXX,  KC_DEL,   KC_BSPC,  KC_ENT,   KC_SPC,   KC_TAB,    XXXXXXX,  XXXXXXX,  KC_NUM,   KC_P7,   KC_P8,    KC_P9,    SM_COLN,  SM_PERC,
     KC_CALC,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  SEL_WRD,   _______,  _______,  SM_LPRN,  KC_P4,   KC_P5,    KC_P6,    KC_PMNS,  KC_PPLS,
-    XXXXXXX,  UNDO,     CUT,      COPY,     PASTE,    SEL_LNE,                       SM_RPRN,  KC_P1,   KC_P2,    KC_P3,    KC_PAST,  KC_PSLS,
+    XXXXXXX,  _UNDO,    _CUT,     _COPY,    _PASTE,   SEL_LNE,                       SM_RPRN,  KC_P1,   KC_P2,    KC_P3,    KC_PAST,  KC_PSLS,
                                   _______,  _______,  _______,                       KC_P0,    KC_PDOT, XXXXXXX
 ),
 
 [_CURSOR] = LAYOUT_split_3x6_3_ex2(
-    KC_ESC,   WM_CLOSE, WM_TCLS,  AP_FEXP,  RENAME,   WM_NEW,   XXXXXXX,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,
-    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  FIND,     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-    KC_ENT,   UNDO,     CUT,      COPY,     PASTE,    _______,                      _______,  _______,  _______,  _______,  _______,  _______,
+    KC_ESC,   WM_CLOSE, WM_TCLS,  AP_FEXP,  _RENAME,  WM_NEW,   XXXXXXX,  XXXXXXX,  _______,  _______,  _______,  _______,  _______,  _______,
+    DEL_NORM, KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  _FIND,    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+    KC_ENT,   _UNDO,    _CUT,     _COPY,    _PASTE,   _______,                      _______,  _______,  _______,  _______,  _______,  _______,
                                   _______,  KC_TAB,   KC_SPC,                       _______,  _______,  _______
 ),
 
 [_MOUSE] = LAYOUT_split_3x6_3_ex2(
     XXXXXXX,  XXXXXXX,  MS_BTN4,  MS_WHLU,  MS_BTN5,  XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,  MS_BTN4,  MS_UP,    MS_BTN5,  XXXXXXX,  XXXXXXX,
     KC_APP,   KC_LCTL,  MS_WHLL,  MS_WHLD,  MS_WHLR,  XXXXXXX,  _______,  _______,  MS_WHLU,  MS_LEFT,  MS_DOWN,  MS_RGHT,  KC_LCTL,  KC_APP,
-    XXXXXXX,  XXXXXXX,  CUT,      COPY,     PASTE,    XXXXXXX,                      MS_WHLD,  MS_BTN1,  MS_BTN3,  MS_BTN2,  XXXXXXX,  XXXXXXX,
+    XXXXXXX,  _UNDO,    _CUT,     _COPY,    _PASTE,   XXXXXXX,                      MS_WHLD,  MS_BTN1,  MS_BTN3,  MS_BTN2,  XXXXXXX,  XXXXXXX,
                                   MS_BTN3,  MS_BTN1,  MS_BTN2,                      _______,  _______,  _______
 ),
 
 [_FUNCTION] = LAYOUT_split_3x6_3_ex2(
     KC_INS,   KC_MUTE,  KC_VOLD,  KC_VOLU,  XXXXXXX,  AP_TERM,  XXXXXXX,  XXXXXXX,  AP_SSHT,  KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F13,
-    KC_CAPS,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  _______,  _______,  _______,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
-    TG_TYP,   KC_MPLY,  KC_MPRV,  KC_MNXT,  UR_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
+    KC_CAPS,  KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,  AP_CHRM,  _______,  _______,  AP_EMOJ,  KC_F4,    KC_F5,    KC_F6,    KC_F11,   KC_F14,
+    TG_TYP,   KC_MPLY,  KC_MPRV,  KC_MNXT,  MC_GPT,   AP_FFOX,                      AP_FEXP,  KC_F1,    KC_F2,    KC_F3,    KC_F12,   KC_F15,
                                   _______,  _______,  _______,                      _______,  _______,  _______
 ),
 
@@ -1339,7 +1362,7 @@ bool rgb_matrix_indicators_user(void) {
             // Set color for DEL
             rgb_matrix_set_color(19, rgb_red.r, rgb_red.g, rgb_red.b);
 
-            // Set color for Getreuer's Select_WORD keys (SEL_ALL, SEL_WRD, SEL_LNE, FIND)
+            // Set color for Getreuer's Select_WORD keys (SEL_ALL, SEL_WRD, SEL_LNE, _FIND)
             static const uint8_t rgb_idx_gesture[] = {
                 1, 2
             };
